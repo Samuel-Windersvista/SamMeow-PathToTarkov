@@ -2,6 +2,7 @@ import { isValidExfilForMap } from './all-exfils';
 import type { ByLocale, ByMap } from './config';
 import {
   EMPTY_STASH,
+  ROAMING_EMERGENCY_STASH,
   isLocaleAvailable,
   type Config,
   type MapName,
@@ -313,7 +314,7 @@ const getErrorsSecondaryStashes = (config: Config): string[] => {
   const names: Set<string> = new Set();
 
   config.hideout_secondary_stashes.forEach(stashConfig => {
-    if (stashConfig.name === EMPTY_STASH.name) {
+    if (stashConfig.name === EMPTY_STASH.name || stashConfig.name === ROAMING_EMERGENCY_STASH.name) {
       errors.push(
         `secondary stash "${stashConfig.name}" is a special reserved name, please choose another.`,
       );

@@ -1,6 +1,6 @@
 import type { ILogger } from '@spt/models/spt/utils/ILogger';
 import type { SaveServer } from '@spt/servers/SaveServer';
-import type { Config, Profile } from './config';
+import { ROAMING_EMERGENCY_STASH, type Config, type Profile } from './config';
 import { getMainStashId, setInventorySlotIds } from './helpers';
 import type { IQuest } from '@spt/models/eft/common/tables/IQuest';
 import { TradersAvailabilityService } from './services/TradersAvailabilityService';
@@ -81,7 +81,7 @@ export const purgeProfiles = (
 
     restoreMainStash(profile, logger);
     restoreTraders(config, tradersAvailabilityService, profile, logger);
-    setInventorySlotIds(profile, mainStashId, config.hideout_secondary_stashes);
+    setInventorySlotIds(profile, mainStashId, [ROAMING_EMERGENCY_STASH, ...config.hideout_secondary_stashes]);
   });
 
   saveServer.save();

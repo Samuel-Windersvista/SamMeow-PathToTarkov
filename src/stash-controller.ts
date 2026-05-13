@@ -1,7 +1,7 @@
 import type { DatabaseServer } from '@spt/servers/DatabaseServer';
 import type { SaveServer } from '@spt/servers/SaveServer';
 import type { AccessVia, ConfigGetter, Profile, StashConfig, UserConfig } from './config';
-import { EMPTY_STASH, STANDARD_STASH_ID } from './config';
+import { EMPTY_STASH, ROAMING_EMERGENCY_STASH, STANDARD_STASH_ID } from './config';
 import {
   checkAccessVia,
   getMainStashId,
@@ -20,7 +20,7 @@ export class StashController {
   ) {}
 
   initSecondaryStashTemplates(givenStashConfigs: StashConfig[]): number {
-    const stashConfigs = [EMPTY_STASH, ...givenStashConfigs];
+    const stashConfigs = [EMPTY_STASH, ROAMING_EMERGENCY_STASH, ...givenStashConfigs];
     const standardTemplate = this.db.getTables()?.templates?.items[STANDARD_STASH_ID];
 
     if (!standardTemplate) {
@@ -68,7 +68,7 @@ export class StashController {
     const initialMainStashId = profile.PathToTarkov.mainStashId;
 
     if (!initialMainStashId) {
-      const allStashConfigs = [EMPTY_STASH, ...this.getConfig(sessionId).hideout_secondary_stashes];
+      const allStashConfigs = [EMPTY_STASH, ROAMING_EMERGENCY_STASH, ...this.getConfig(sessionId).hideout_secondary_stashes];
       const mainStashId = retrieveMainStashIdFromItems(pmc.Inventory.items, allStashConfigs);
       profile.PathToTarkov.mainStashId = mainStashId ?? pmc.Inventory.stash;
     }
@@ -121,7 +121,7 @@ export class StashController {
     return (
       this.getConfig(sessionId).hideout_secondary_stashes.find(stash =>
         checkAccessVia(stash.access_via, offraidPosition),
-      ) ?? EMPTY_STASH
+      ) ?? ROAMING_EMERGENCY_STASH
     );
   }
 
@@ -138,7 +138,7 @@ export class StashController {
 
     const inventory = profile.characters.pmc.Inventory;
     const stashId = inventory.stash;
-    const secondaryStashes = this.getConfig(sessionId).hideout_secondary_stashes;
+    const secondaryStashes = [ROAMING_EMERGENCY_STASH, ...this.getConfig(sessionId).hideout_secondary_stashes];
 
     setInventorySlotIds(profile, stashId, secondaryStashes);
   }
@@ -156,5 +156,68 @@ export class StashController {
 
   getHideoutEnabled(offraidPosition: string, sessionId: string): boolean {
     return this.getMainStashAvailable(offraidPosition, sessionId);
+  }
+
+  private shouldUseRoamingEmergencyStash(offraidPosition: string, sessionId: string): boolean {
+    const mainStashAvailable = this.getMainStashAvailable(offraidPosition, sessionId);
+
+    if (mainStashAvailable) {
+      return false;
+    }
+
+    const secondaryStash = this.getSecondaryStash(offraidPosition, sessionId);
+    return secondaryStash.mongoId === ROAMING_EMERGENCY_STASH.mongoId;
+  }
+
+  public isRoamingEmergencyStashActive(sessionId: string): boolean {
+    const profile: Profile = this.saveServer.getProfile(sessionId);
+    return profile.characters.pmc.Inventory.stash === ROAMING_EMERGENCY_STASH.mongoId;
+  }
+
+  public clearRoamingEmergencyStashOnExit(nextOffraidPosition: string, sessionId: string): number {
+    // Return 0 if current stash is not roaming emergency stash
+    if (!this.isRoamingEmergencyStashActive(sessionId)) {
+      return 0;
+    }
+
+    // Return 0 if next position still resolves to roaming fallback
+    if (this.shouldUseRoamingEmergencyStash(nextOffraidPosition, sessionId)) {
+      return 0;
+    }
+
+    const profile: Profile = this.saveServer.getProfile(sessionId);
+    const inventory = profile.characters.pmc.Inventory;
+    const roamingMongoId = ROAMING_EMERGENCY_STASH.mongoId;
+
+    // Build set of descendant IDs to remove (root itself is kept)
+    // Start with the root as the ancestor anchor, but not in the removal set
+    const ancestorIds = new Set<string>([roamingMongoId]);
+    const idsToRemove = new Set<string>();
+
+    // Iteratively find all descendants whose parent chain traces back to roaming stash root
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const item of inventory.items) {
+        const parentId = (item as unknown as { parentId?: string }).parentId;
+        if (parentId && ancestorIds.has(parentId) && !ancestorIds.has(item._id)) {
+          ancestorIds.add(item._id);
+          idsToRemove.add(item._id);
+          changed = true;
+        }
+      }
+    }
+
+    // Remove matching items and count (root excluded from removal set)
+    let removedCount = 0;
+    inventory.items = inventory.items.filter(item => {
+      if (idsToRemove.has(item._id)) {
+        removedCount = removedCount + 1;
+        return false;
+      }
+      return true;
+    });
+
+    return removedCount;
   }
 }

@@ -323,6 +323,12 @@ export const EMPTY_STASH = toStashConfig({
   access_via: [], // not used but this simplify typing
 });
 
+export const ROAMING_EMERGENCY_STASH = toStashConfig({
+  id: 'PathToTarkov_Roaming_Emergency_Stash',
+  size: 20,
+  access_via: [], // not used but this simplify typing
+});
+
 export const SLOT_ID_HIDEOUT = 'hideout';
 export const SLOT_ID_LOCKED_STASH = 'ptt_locked_stash';
 

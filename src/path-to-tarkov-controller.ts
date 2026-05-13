@@ -420,6 +420,11 @@ export class PathToTarkovController {
       this.logger.info(`=> PathToTarkov: player offraid position changed to '${offraidPosition}'`);
     }
 
+    const nbCleared = this.stashController.clearRoamingEmergencyStashOnExit(offraidPosition, sessionId);
+    if (nbCleared > 0) {
+      this.logger.warning(`=> PathToTarkov: cleared ${nbCleared} item${nbCleared > 1 ? 's' : ''} from roaming emergency stash`);
+    }
+
     this.stashController.updateStash(offraidPosition, sessionId);
 
     const config = this.getConfig(sessionId);
