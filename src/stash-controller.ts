@@ -190,7 +190,6 @@ export class StashController {
     const roamingMongoId = ROAMING_EMERGENCY_STASH.mongoId;
 
     // Build set of descendant IDs to remove (root itself is kept)
-    // Start with the root as the ancestor anchor, but not in the removal set
     const ancestorIds = new Set<string>([roamingMongoId]);
     const idsToRemove = new Set<string>();
 

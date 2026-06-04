@@ -105,11 +105,13 @@ describe('StashController roaming emergency stash', () => {
       const mockUserConfig: UserConfig = {
         selectedConfig: 'Default',
         gameplay: {
-          multistash: true, // multi-stash enabled → roaming fallback is reachable
+          multistash: true,
           tradersAccessRestriction: true,
           resetOffraidPositionOnPlayerDeath: true,
           playerScavMoveOffraidPosition: false,
           keepFoundInRaidTweak: true,
+          fleaMarketMode: 'everywhere',
+          fleaMarketMinLevel: 15,
         },
       };
 
@@ -148,6 +150,8 @@ describe('StashController roaming emergency stash', () => {
         resetOffraidPositionOnPlayerDeath: true,
         playerScavMoveOffraidPosition: false,
         keepFoundInRaidTweak: true,
+        fleaMarketMode: 'everywhere',
+        fleaMarketMinLevel: 15,
       },
     };
 

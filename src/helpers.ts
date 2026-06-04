@@ -8,12 +8,16 @@ import type { AccessVia, Config, PositionXYZ, Profile, SpawnPoint, StashConfig }
 import { EMPTY_STASH, SLOT_ID_HIDEOUT, SLOT_ID_LOCKED_STASH, VANILLA_STASH_IDS } from './config';
 import type { IItem } from '@spt/models/eft/common/tables/IItem';
 import type { AllLocalesInDb } from './services/LocaleResolver';
+import { ensureArray } from './utils';
 
-export const isWildcardAccessVia = (access_via: AccessVia): boolean =>
-  access_via === '*' || access_via[0] === '*';
+export const isWildcardAccessVia = (access_via: AccessVia): boolean => {
+  const arr = ensureArray(access_via);
+  return arr.length === 1 && arr[0] === '*';
+};
 
 export function checkAccessVia(access_via: AccessVia, value: string): boolean {
-  return isWildcardAccessVia(access_via) || access_via.includes(value);
+  const accessViaArray = ensureArray(access_via);
+  return accessViaArray.includes('*') || accessViaArray.includes(value);
 }
 
 const getPosition = (pos: SpawnPoint['Position']): PositionXYZ => {

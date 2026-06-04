@@ -3,12 +3,14 @@ using BepInEx.Bootstrap;
 
 using PTT.Services;
 using System;
+using System.Reflection;
 using EFT.Communications;
 using PTT;
 using BepInEx.Logging;
 
 namespace PTT;
 
+[BepInDependency("com.fika.core", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInPlugin("Trap.PathToTarkov", "Path To Tarkov", PluginVersion.VERSION)]
 public class Plugin : BaseUnityPlugin
 {
@@ -50,20 +52,51 @@ public class Plugin : BaseUnityPlugin
             new Patches.KaenoTraderScrollingCompatPatch().Enable();
         }
 
-        new Patches.HideLockedTraderCardPatch().Enable();
-        new Patches.HideLockedTraderPanelPatch().Enable();
-        new Patches.InitAllExfiltrationPointsPatch().Enable();
-        new Patches.ScavExfiltrationPointPatch().Enable();
-        new Patches.OnGameStartedPatch().Enable();
-        new Patches.LocalRaidStartedPatch().Enable();
-        new Patches.LocalRaidEndedPatch().Enable();
-        new Patches.MenuScreenAwakePatch().Enable();
-        new Patches.ExitTimerPanelSetTimerTextActivePatch().Enable();
-        new Patches.ExitTimerPanelUpdateVisitedStatusPatch().Enable();
-        new Patches.ExtractionTimersPanelSwitchTimersPatch().Enable();
-        new Patches.ExtractionTimersPanelAwakePatch().Enable();
+        Helpers.Logger.Info("Registering PTT patches...");
+        
+        try
+        {
+            new Patches.HideLockedTraderCardPatch().Enable();
+            new Patches.HideLockedTraderPanelPatch().Enable();
+            
+            Helpers.Logger.Info("Registering ExfiltrationPointAwakePatch...");
+            new Patches.ExfiltrationPointAwakePatch().Enable();
+            Helpers.Logger.Info("ExfiltrationPointAwakePatch registered successfully!");
+            
+            Helpers.Logger.Info("Registering InitAllExfiltrationPointsPatch...");
+            new Patches.InitAllExfiltrationPointsPatch().Enable();
+            Helpers.Logger.Info("InitAllExfiltrationPointsPatch registered successfully!");
+            
+            Helpers.Logger.Info("Registering ScavExfiltrationPointPatch...");
+            new Patches.ScavExfiltrationPointPatch().Enable();
+            Helpers.Logger.Info("ScavExfiltrationPointPatch registered successfully!");
+            
+            new Patches.OnGameStartedPatch().Enable();
+            new Patches.LocalRaidStartedPatch().Enable();
+            new Patches.LocalRaidEndedPatch().Enable();
+            new Patches.MenuScreenAwakePatch().Enable();
+            new Patches.ExitTimerPanelSetTimerTextActivePatch().Enable();
+            new Patches.ExitTimerPanelUpdateVisitedStatusPatch().Enable();
+            new Patches.ExtractionTimersPanelSwitchTimersPatch().Enable();
+            new Patches.ExtractionTimersPanelAwakePatch().Enable();
 
-        Helpers.Logger.Info($"Plugin Trap-PathToTarkov v{PluginVersion.FULL_VERSION} is loaded!");
+            Helpers.Logger.Info($"Plugin Trap-PathToTarkov v{PluginVersion.FULL_VERSION} is loaded with all patches registered!");
+        }
+        catch (Exception ex)
+        {
+            Helpers.Logger.Error($"Failed to register patches: {ex.Message}");
+            Helpers.Logger.Error($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
+
+        // Initialize Fika module if installed
+        if (FikaIsInstalled)
+        {
+            TryInitFikaModule();
+        }
+        
+        // Trigger Awake event for Fika module
+        FikaBridge.PluginAwake();
     }
 
     protected void Start()
@@ -76,12 +109,11 @@ public class Plugin : BaseUnityPlugin
 
             if (fikaVersion < new Version(FIKA_MIN_VERSION))
             {
-                Helpers.Logger.Warning($"Fika >= {IE_API_MIN_VERSION} is required");
+                Helpers.Logger.Warning($"Fika >= {FIKA_MIN_VERSION} is required");
                 FikaIsOutdated = true;
             }
 
             Helpers.Logger.Info($"Fika.Core plugin detected");
-            TransitVoteServiceFika.Init();
         }
 
         if (InteractableExfilsApiIsInstalled)
@@ -101,20 +133,40 @@ public class Plugin : BaseUnityPlugin
         {
             Helpers.Logger.Error($"Jehree.InteractableExfilsAPI plugin is missing");
         }
+        
+        // Trigger Start event for Fika module
+        FikaBridge.PluginStart();
     }
 
     // Warning: use GameStarted to get a coopPlayer
     public static void RaidStarted()
     {
-        if (FikaIsInstalled)
-        {
-            TransitVoteServiceFika.OnRaidStarted();
-        }
+        // Trigger RaidStarted event for Fika module
+        FikaBridge.RaidStarted();
 
         if (CurrentLocationDataService != null)
         {
-            CurrentLocationDataService.Init();
-            Helpers.Logger.Info("Initialized CurrentLocationDataService");
+            bool initOk = CurrentLocationDataService.Init();
+            if (initOk)
+            {
+                Helpers.Logger.Info("Initialized CurrentLocationDataService");
+                
+                // Clear any cached exfil prompts before applying filtering
+                if (IEApiWrapper.ExfilPromptService != null)
+                {
+                    IEApiWrapper.ExfilPromptService.ClearExfilPromptsCache();
+                }
+                
+                // Disable non-configured exfils now that we know which ones are enabled
+                Patches.ExfiltrationPointAwakePatch.DisableInvalidExfils();
+                
+                // Apply exfil filtering now that location data is loaded
+                Patches.InitAllExfiltrationPointsPatch.ApplyExfilFiltering();
+            }
+            else
+            {
+                Helpers.Logger.Warning("CurrentLocationDataService init failed — vanilla exfils preserved");
+            }
         }
         else
         {
@@ -134,10 +186,8 @@ public class Plugin : BaseUnityPlugin
 
     public static void GameStarted()
     {
-        if (FikaIsInstalled)
-        {
-            TransitVoteServiceFika.OnGameStarted();
-        }
+        // Trigger GameStarted event for Fika module
+        FikaBridge.GameStarted();
 
         DisplayOutdatedVersionsWarnings();
         Helpers.Logger.Info("Game started!");
@@ -146,6 +196,15 @@ public class Plugin : BaseUnityPlugin
     public static void RaidEnded()
     {
         Helpers.Logger.Info("Raid ended!");
+        
+        // Reset CurrentLocationDataService for next raid
+        if (CurrentLocationDataService != null)
+        {
+            CurrentLocationDataService.Reset();
+        }
+        
+        // Reset tracked exfils
+        Patches.ExfiltrationPointAwakePatch.ClearTrackedExfils();
     }
 
     public static void DisplayOutdatedVersionsWarnings()
@@ -189,5 +248,29 @@ public class Plugin : BaseUnityPlugin
         }
 
         PathToTarkovServerFullVersion = data.fullVersion;
+    }
+
+    private void TryInitFikaModule()
+    {
+        try
+        {
+            Assembly fikaModuleAssembly = Assembly.Load("PTT-Fika");
+            Type mainType = fikaModuleAssembly.GetType("PTT.Fika.Main");
+            MethodInfo initMethod = mainType.GetMethod("Init", BindingFlags.Public | BindingFlags.Static);
+
+            if (initMethod != null)
+            {
+                initMethod.Invoke(null, null);
+                Helpers.Logger.Info("Successfully initialized PTT-Fika module");
+            }
+            else
+            {
+                Helpers.Logger.Error("Failed to find Init method in PTT-Fika module");
+            }
+        }
+        catch (Exception ex)
+        {
+            Helpers.Logger.Error($"Failed to load PTT-Fika module: {ex.Message}");
+        }
     }
 }

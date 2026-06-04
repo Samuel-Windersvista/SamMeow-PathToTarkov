@@ -144,7 +144,7 @@ const getErrorsForOffraidPositions = (config: Config, spawnConfig: SpawnConfig):
           );
         }
 
-        if (!offraidPosition && (!parsed.transitTargetMapName || !parsed.transitTargetMapName)) {
+        if (!offraidPosition && (!parsed.transitTargetMapName || !parsed.transitTargetSpawnPointId)) {
           errors.push(`cannot parse exfil target in exfiltrations.${mapName}.${extractName}`);
         }
 
