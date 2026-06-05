@@ -2,7 +2,7 @@ using PTT.Data;
 
 namespace PTT.Services;
 
-internal static class CurrentExfilTargetService
+public static class CurrentExfilTargetService
 {
     private static ExfilTarget CurrentExfilTarget { get; set; } = null;
 

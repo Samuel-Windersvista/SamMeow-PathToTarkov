@@ -81,7 +81,10 @@ export const purgeProfiles = (
 
     restoreMainStash(profile, logger);
     restoreTraders(config, tradersAvailabilityService, profile, logger);
-    setInventorySlotIds(profile, mainStashId, [ROAMING_EMERGENCY_STASH, ...config.hideout_secondary_stashes]);
+    setInventorySlotIds(profile, mainStashId, [
+      ROAMING_EMERGENCY_STASH,
+      ...config.hideout_secondary_stashes,
+    ]);
   });
 
   saveServer.save();

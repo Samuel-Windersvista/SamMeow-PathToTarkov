@@ -68,7 +68,11 @@ export class StashController {
     const initialMainStashId = profile.PathToTarkov.mainStashId;
 
     if (!initialMainStashId) {
-      const allStashConfigs = [EMPTY_STASH, ROAMING_EMERGENCY_STASH, ...this.getConfig(sessionId).hideout_secondary_stashes];
+      const allStashConfigs = [
+        EMPTY_STASH,
+        ROAMING_EMERGENCY_STASH,
+        ...this.getConfig(sessionId).hideout_secondary_stashes,
+      ];
       const mainStashId = retrieveMainStashIdFromItems(pmc.Inventory.items, allStashConfigs);
       profile.PathToTarkov.mainStashId = mainStashId ?? pmc.Inventory.stash;
     }
@@ -138,7 +142,10 @@ export class StashController {
 
     const inventory = profile.characters.pmc.Inventory;
     const stashId = inventory.stash;
-    const secondaryStashes = [ROAMING_EMERGENCY_STASH, ...this.getConfig(sessionId).hideout_secondary_stashes];
+    const secondaryStashes = [
+      ROAMING_EMERGENCY_STASH,
+      ...this.getConfig(sessionId).hideout_secondary_stashes,
+    ];
 
     setInventorySlotIds(profile, stashId, secondaryStashes);
   }

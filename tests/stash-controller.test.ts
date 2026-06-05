@@ -41,7 +41,7 @@ describe('StashController roaming emergency stash', () => {
 
       // ── Instantiate StashController ──
       const controller = new StashController(
-        () => ({} as Config), // getConfig — not used by initSecondaryStashTemplates
+        () => ({}) as Config, // getConfig — not used by initSecondaryStashTemplates
         {} as UserConfig, // userConfig — not used by initSecondaryStashTemplates
         mockDb as never,
         {} as never,
@@ -55,7 +55,10 @@ describe('StashController roaming emergency stash', () => {
       const roamingTemplate = mockItemsDb[expectedRoamingTemplateId];
       expect(roamingTemplate).toBeDefined();
 
-      const template = roamingTemplate as { _name: string; _props?: { Grids?: Array<{ _id: string; _props: { cellsV: number } }> } };
+      const template = roamingTemplate as {
+        _name: string;
+        _props?: { Grids?: Array<{ _id: string; _props: { cellsV: number } }> };
+      };
       expect(template._name).toContain('size 20');
 
       const grid = template._props?.Grids?.[0];
@@ -158,8 +161,18 @@ describe('StashController roaming emergency stash', () => {
     function createRoamingItems() {
       return {
         root: { _id: expectedRoamingMongoId, _tpl: expectedRoamingTemplateId },
-        directChild: { _id: 'direct_child_1', _tpl: 'fake_item_tpl', parentId: expectedRoamingMongoId, slotId: 'hideout' },
-        nestedChild: { _id: 'nested_child_1', _tpl: 'fake_item_tpl_2', parentId: 'direct_child_1', slotId: 'hideout' },
+        directChild: {
+          _id: 'direct_child_1',
+          _tpl: 'fake_item_tpl',
+          parentId: expectedRoamingMongoId,
+          slotId: 'hideout',
+        },
+        nestedChild: {
+          _id: 'nested_child_1',
+          _tpl: 'fake_item_tpl_2',
+          parentId: 'direct_child_1',
+          slotId: 'hideout',
+        },
       };
     }
 
@@ -207,7 +220,9 @@ describe('StashController roaming emergency stash', () => {
       );
 
       // ── Act: clear roaming stash when exiting to PlayerHideout ──
-      const nbCleared = (controller as unknown as ClearOnExitMethod).clearRoamingEmergencyStashOnExit('PlayerHideout', 'test_session');
+      const nbCleared = (
+        controller as unknown as ClearOnExitMethod
+      ).clearRoamingEmergencyStashOnExit('PlayerHideout', 'test_session');
 
       // ── Assert: root item is kept, only descendant items are removed ──
       const items = profile.characters.pmc.Inventory.items;
@@ -243,7 +258,9 @@ describe('StashController roaming emergency stash', () => {
       );
 
       // ── Act: attempt to clear roaming stash when next position is still roaming ──
-      const nbCleared = (controller as unknown as ClearOnExitMethod).clearRoamingEmergencyStashOnExit(ROAMING_POSITION, 'test_session');
+      const nbCleared = (
+        controller as unknown as ClearOnExitMethod
+      ).clearRoamingEmergencyStashOnExit(ROAMING_POSITION, 'test_session');
 
       // ── Assert: roaming stash items remain untouched ──
       const items = profile.characters.pmc.Inventory.items;

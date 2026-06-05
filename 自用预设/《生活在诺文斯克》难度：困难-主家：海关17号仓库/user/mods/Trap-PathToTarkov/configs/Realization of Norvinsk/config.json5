@@ -1,0 +1,1170 @@
+{
+  // 当配置文件创建时（或首次安装PTT时）的默认脱战位置
+  initial_offraid_position: 'PlayerHideout',
+
+  // 玩家死亡时的脱战位置（仅在 `reset_offraid_position_on_player_die` 为 true 时生效）
+  // 你可以在这里放置多个脱战位置，死亡时会随机选择一个
+  respawn_at: ['PlayerHideout'],
+
+  // 启用此选项后，将根据定义的路径自动创建传送点
+  enable_automatic_transits_creation: false,
+
+  // 官方不支持原版传送点，但你仍然可以在这里启用它们
+  enable_all_vanilla_transits: true,
+
+  // 查看 `Examples/OverrideByProfiles` 配置文件以获取完整的使用示例
+  override_by_profiles: {},
+
+  debug_exfiltrations_tooltips_locale: 'en',
+
+  restrictions_in_raid: {
+    // 卢布
+    '5449016a4bdc2d6f028b456f': {
+      Value: 800000,
+    },
+    // 美元
+    '5696686a4bdc2da3298b456a': {
+      Value: 10000,
+    },
+    // 欧元
+    '569668774bdc2da2298b4568': {
+      Value: 10000,
+    },
+    // 箱子钥匙
+    '67449b6c89d5e1ddc603f504': {
+      Value: 42,
+    },
+    // 上锁的箱子
+    '6740987b89d5e1ddc603f4f0': {
+      Value: 10,
+    },
+  },
+  offraid_regen_config: {
+    // 能补水的位置
+    hydration: {
+      access_via: [
+        'PlayerHideout',
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+        'Mechanic_Hideout',
+        'Skier_Hideout',
+        'Peacekeeper_Hideout',
+        'Jaeger_Hideout',
+      ],
+    },
+    // 能恢复能量的位置
+    energy: {
+      access_via: [
+        'PlayerHideout',
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+        'Mechanic_Hideout',
+        'Skier_Hideout',
+        'Peacekeeper_Hideout',
+        'Jaeger_Hideout',
+      ],
+    },
+    // 能恢复血量的位置
+    health: {
+      access_via: [
+        'PlayerHideout',
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+        'Mechanic_Hideout',
+        'Skier_Hideout',
+        'Peacekeeper_Hideout',
+        'Jaeger_Hideout',
+      ],
+    },
+  },
+  // 主藏身处储物箱配置
+  hideout_main_stash_access_via: [
+    'PlayerHideout',
+    'GZHideout',
+    'streetsHideout',
+    'woodsHideout',
+    'IntBigHideout',
+    'ShorLightHideout',
+  ],
+  // 次要藏身处储物箱配置，每个位置都是独立的，可以单独设置
+  hideout_secondary_stashes: [
+    {
+      id: 'Mechanic_Hideout_stash',
+      size: 50,
+      access_via: ['Mechanic_Hideout'],
+    },
+    {
+      id: 'Skier_Hideout_stash',
+      size: 50,
+      access_via: ['Skier_Hideout'],
+    },
+    {
+      id: 'Peacekeeper_Hideout_stash',
+      size: 50,
+      access_via: ['Peacekeeper_Hideout'],
+    },
+    {
+      id: 'Jaeger_Hideout_stash',
+      size: 50,
+      access_via: ['Jaeger_Hideout'],
+    },
+    {
+      id: 'All_Fence_Car_Stash',
+      size: 20,
+      access_via: ['All_Fence_Car'],
+    },
+  ],
+  traders_config: {
+    // 毛商的配置
+    '54cb50c76803fa8b248b4571': {
+      insurance_always_enabled: true,
+      insurance_config: {
+        insurance_price_coef: 80,
+        min_payment: 0,
+        min_return_hour: 240,
+        max_return_hour: 360,
+        max_storage_time: 480,
+        return_chance_percent: 70,
+      },
+      repair_always_enabled: true,
+      repair_config: {
+        quality: 0.7,
+        currency: '5449016a4bdc2d6f028b456f',
+        currency_coefficient: 12,
+        repair_price_coef: 90,
+      },
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 大妈的配置
+    '54cb57776803fa99248b456e': {
+      insurance_always_enabled: true,
+      insurance_config: {
+        insurance_price_coef: 50,
+        min_payment: 0,
+        min_return_hour: 120,
+        max_return_hour: 240,
+        max_storage_time: 480,
+        return_chance_percent: 50,
+      },
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 机械师的配置
+    '5a7c2eca46aef81a7ca2145d': {
+      override_description: true,
+      location_description: {
+        ch: '在工厂的监控地堡门进入机械师据点',
+        en: '在工厂的监控地堡门进入机械师据点',
+      },
+      access_via: ['GZHideout', 'Mechanic_Hideout'],
+    },
+    // 雪人的配置
+    '58330581ace78e27b8b10cee': {
+      insurance_always_enabled: false,
+      insurance_config: {
+        insurance_price_coef: 100,
+        min_payment: 0,
+        min_return_hour: 48,
+        max_return_hour: 72,
+        max_storage_time: 360,
+        return_chance_percent: 70,
+      },
+      override_description: true,
+      location_description: {
+        ch: '在海关的ZB1011进入雪人据点',
+        en: '在海关的ZB1011进入雪人据点',
+      },
+      access_via: ['GZHideout', 'Skier_Hideout'],
+    },
+    // 裁缝的配置
+    '5ac3b934156ae10c4430e83c': {
+      insurance_always_enabled: false,
+      insurance_config: {
+        insurance_price_coef: 75,
+        min_payment: 0,
+        min_return_hour: 0,
+        max_return_hour: 0,
+        max_storage_time: 480,
+        return_chance_percent: 85,
+      },
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 耶格的配置
+    '5c0647fdd443bc2504c2d371': {
+      override_description: true,
+      location_description: {
+        ch: '在森林的ZB014进入耶格据点',
+        en: '在森林的ZB014进入耶格据点',
+      },
+      access_via: ['Jaeger_Hideout'],
+    },
+    // 美商的配置
+    '5935c25fb3acc3127c3d8cd9': {
+      override_description: true,
+      location_description: {
+        ch: '在储备站的地下仓库密闭门进入美商据点',
+        en: '在储备站的地下仓库密闭门进入美商据点',
+      },
+      access_via: ['Peacekeeper_Hideout'],
+    },
+    // Fence的配置
+    '579dc571d53a0658a154fbec': {
+      access_via: ['*'], // 允许通过所有撤离点访问
+      insurance_always_enabled: true,
+      insurance_config: {
+        insurance_price_coef: 120,
+        min_payment: 10000000,
+        min_return_hour: 120,
+        max_return_hour: 240,
+        max_storage_time: 120,
+        return_chance_percent: 30,
+      },
+      repair_always_enabled: false,
+      repair_config: {
+        quality: 0.7,
+        currency: '5449016a4bdc2d6f028b456f',
+        currency_coefficient: 12,
+        repair_price_coef: 90,
+      },
+      heal_always_enabled: false,
+    },
+    // 竞技场商人
+    '6617beeaa9cfa777ca915b7c': {
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 能访问跳蚤市场(Ragfair)的位置
+    ragfair: {
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+        'Mechanic_Hideout',
+        'Skier_Hideout',
+        'Peacekeeper_Hideout',
+        'Jaeger_Hideout',
+      ],
+    },
+    //阿尔乔姆
+    '66bf757f27d0b097db0acea5': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 画家
+    '668aaff35fd574b6dcc4a686': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 蝎子
+    '6688d464bc40c867f60e7d7e': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 冻伤
+    '66ef9505bede6c894d6b47bd': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // gunsmith
+    '4e7ef752240141bca059b2ea': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '在工厂的监控地堡门进入机械师据点',
+        en: '在工厂的监控地堡门进入机械师据点',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+        'Mechanic_Hideout',
+      ],
+    },
+    // 萨莉亚
+    '66f4db5ca4958508883d700c': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 学者协会（技能扩展商人）
+    '66bf1f65e1f3b83ea069a271': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 荷官
+    '1337bb0dd843363fcd1be869': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    //不明生还者
+    '6758f03d55bf9943a7b14e47': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    //Epakim
+    '67b67103b32c5563e508998a': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    //友好PMC商人-骑士
+    '67768b19fa281ca31708b187': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    //Requisitions Office（军需办公室）
+    '66f0eaa93f6cc015bc1f3acb': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    //赫菲斯托斯（武器预设商人）
+    '6746722bcce65386cfcc7209': {
+      disable_warning: true,
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // 藏身处物资商人
+    '67419e9d0d4541ce671543bb': {
+      override_description: true,
+      location_description: {
+        ch: '在主家和城镇中访问，方便建设藏身处',
+        en: '在主家和城镇中访问，方便建设藏身处',
+      },
+      access_via: [
+        'PlayerHideout',
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // Badger
+    bd3a8b28356d9c6509966546: {
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // Volkov
+    '67ae94fcc9ba3302b328c2f7': {
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // The GiftsArchive
+    '680d3b48efde0fa8ffde1fc1': {
+      override_description: true,
+      location_description: {
+        ch: '秘密通道里可以找到他',
+        en: '秘密通道里可以找到他',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // couturier
+    '66eeef8b2a166b73dc0671e8': {
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // Anastasia
+    '678937229797bd983dca2137': {
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // Evelyn
+    '6789373b0f5ecebf0bc152d5': {
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+    // Svetlana
+    '6789374aebcb3ad4c6e073bd': {
+      override_description: true,
+      location_description: {
+        ch: '在各地图的城镇里',
+        en: '在各地图的城镇里',
+      },
+      access_via: [
+        'GZHideout',
+        'streetsHideout',
+        'woodsHideout',
+        'IntBigHideout',
+        'ShorLightHideout',
+      ],
+    },
+  },
+  // 撤离点位置的通往配置
+  exfiltrations: {
+    factory4_day: {
+      'Gate 3': ['bigmap_FarCorner_factory_Gate3'],
+      'Gate m': ['woods_FactGate_factory_Mtent'],
+      'Gate 0': ['bigmap_OldGas_factory_Gate0'],
+      Cellars: ['bigmap_1012_factory_Cellars'],
+      'Camera Bunker Door': ['Mechanic_Hideout'],
+    },
+    factory4_night: {
+      'Gate 3': ['bigmap_FarCorner_factory_Gate3'],
+      'Gate m': ['woods_FactGate_factory_Mtent'],
+      'Gate 0': ['bigmap_OldGas_factory_Gate0'],
+      Cellars: ['bigmap_1012_factory_Cellars'],
+      'Camera Bunker Door': ['Mechanic_Hideout'],
+    },
+    bigmap: {
+      'ZB-1011': ['Skier_Hideout'],
+      'ZB-1012': ['bigmap_1012_factory_Cellars'],
+      EXFIL_ZB013: ['Secret_Pass'],
+      'Trailer Park': ['IntBigHideout'],
+      'Dorms V-Ex': ['All_Fence_Car'],
+      'Railroad To Port': ['bigmap_RRtPort_shoreline_RBridge'],
+      'RUAF Roadblock': ['Inter_Railway_woods_UN_bigmap_RUAF'],
+      "Smuggler's Boat": ['bigmap_Boat_shoreline_Boat'],
+      'Old Azs Gate': ['bigmap_OldGas_factory_Gate0'],
+      Crossroads: ['Inter_Ecom_bigmap_Crossroads_Shore_RtC'],
+      'Factory Far Corner': ['bigmap_FarCorner_factory_Gate3'],
+      'Military Checkpoint': ['woods_RUAF_bigmap_ScavCP'],
+      Shack: ['bigmap_MilitaryCP_rezervbase_Scavlands'],
+      'Warehouse 17': ['PlayerHideout'],
+    },
+    woods: {
+      'East Gate': ['Secret_Pass'],
+      'South V-Ex': ['All_Fence_Car'],
+      'ZB-014': ['Jaeger_Hideout'],
+      'ZB-016': ['woodsHideout'],
+      'un-sec': ['woods_NUN_streets_Crash'],
+      'UN Roadblock': ['Inter_Railway_woods_UN_bigmap_RUAF'],
+      'Factory Gate': ['woods_FactGate_factory_Mtent'],
+      Outskirts: ['woods_Out_lighthouse_NorCP'],
+      'RUAF Gate': ['woods_RUAF_bigmap_ScavCP'],
+    },
+    rezervbase: {
+      EXFIL_Bunker_D2: ['Secret_Pass'],
+      EXFIL_Bunker: ['Peacekeeper_Hideout'],
+      EXFIL_ScavCooperation: ['bigmap_MilitaryCP_rezervbase_Scavlands'],
+      Alpinist: ['rezervbase_Cliff_shoreline_Cliffs'],
+      EXFIL_Train: ['rezervbase_Train_lighthouse_Industrial'],
+    },
+    interchange: {
+      'NW Exfil': ['Inter_Railway_woods_UN_bigmap_RUAF'],
+      'SE Exfil': ['Inter_Ecom_bigmap_Crossroads_Shore_RtC'],
+      'PP Exfil': ['All_Fence_Car'],
+      'Saferoom Exfil': ['Secret_Pass'],
+      'Hole Exfill': ['sandbox_Scav_streets_Klimov_Int_Hole'],
+      'Interchange Cooperation': ['IntBigHideout'],
+    },
+    shoreline: {
+      RedRebel_alp: ['rezervbase_Cliff_shoreline_Cliffs'],
+      'Road to Customs': ['Inter_Ecom_bigmap_Crossroads_Shore_RtC'],
+      Lighthouse_pass: ['shoreline_PathLighthouse_lighthouse_PathShoreline'],
+      Tunnel: ['ShorLightHideout'],
+      'Shorl_V-Ex': ['All_Fence_Car'],
+      Road_at_railbridge: ['bigmap_RRtPort_shoreline_RBridge'],
+      'Pier Boat': ['bigmap_Boat_shoreline_Boat'],
+      'South Fence Passage': ['Secret_Pass'],
+    },
+    lighthouse: {
+      tunnel_shared: ['ShorLightHideout'],
+      ' V-Ex_light': ['All_Fence_Car'],
+      Shorl_free: ['shoreline_PathLighthouse_lighthouse_PathShoreline'],
+      Scav_Industrial_zone: ['rezervbase_Train_lighthouse_Industrial'],
+      Nothern_Checkpoint: ['woods_Out_lighthouse_NorCP'],
+    },
+    tarkovstreets: {
+      E7: ['lab_Hangar_streets_Expo'],
+      scav_e7: ['lab_ParkGate_sandbox_Mira_streets_Cardinal'],
+      E9_sniper: ['sandbox_Scav_streets_Klimov_Int_Hole'],
+      E4: ['woods_NUN_streets_Crash'],
+      E2: ['lab_Sewage_streets_Sewer'],
+      E7_car: ['All_Fence_Car'],
+      scav_e2: ['streetsHideout'],
+    },
+    laboratory: {
+      lab_Parking_Gate: ['lab_ParkGate_sandbox_Mira_streets_Cardinal'],
+      lab_Hangar_Gate: ['lab_Hangar_streets_Expo'],
+      lab_Elevator_Med: ['lab_Elevator_1_sandbox_Mira'],
+      lab_Under_Storage_Collector: ['lab_Sewage_streets_Sewer'],
+      lab_Elevator_Main: ['lab_Elevator_1_sandbox_Mira'],
+      lab_Elevator_Cargo: ['lab_Elevator_1_sandbox_Mira'],
+    },
+    sandbox: {
+      Unity_free_exit: ['GZHideout'],
+      Sandbox_VExit: ['All_Fence_Car'],
+      Sniper_exit: ['lab_ParkGate_sandbox_Mira_streets_Cardinal'],
+      Scav_coop_exit: ['sandbox_Scav_streets_Klimov_Int_Hole'],
+    },
+  },
+  // 进入战局的位置设置
+  infiltrations: {
+    PlayerStart: {
+      sandbox: ['SandboxPlayerStart'],
+    },
+    PlayerHideout: {
+      bigmap: ['Warehouse 17'],
+    },
+    GZHideout: {
+      sandbox: ['EmercomGZ'],
+    },
+    streetsHideout: {
+      tarkovstreets: ['Catacombs'],
+    },
+    woodsHideout: {
+      woods: ['ZB-016'],
+    },
+    IntBigHideout: {
+      interchange: ['Scav Camp'],
+      bigmap: ['Trailer Park'],
+    },
+    ShorLightHideout: {
+      lighthouse: ['Lighthouse Tunnel'],
+      shoreline: ['Shoreline Tunnel'],
+    },
+    All_Fence_Car: {
+      sandbox: ['Police Car'],
+      tarkovstreets: ['Streets Vehicle Extract'],
+      lighthouse: ['Lighthouse Vehicle Extract'],
+      shoreline: ['North Fence Passage'],
+      interchange: ['Interchange Vehicle Extract'],
+      woods: ['Woods Vehicle Extract'],
+      bigmap: ['Dorms Car'],
+    },
+    Secret_Pass: {
+      rezervbase: ['D-2'],
+      woods: ['Scav Bunker'],
+      shoreline: ['Old Bunker'],
+      bigmap: ['ZB-1013'],
+    },
+    Mechanic_Hideout: {
+      factory4_day: ['Camera Bunker Door'],
+      factory4_night: ['Camera Bunker Door'],
+    },
+    Skier_Hideout: {
+      bigmap: ['ZB-1011'],
+    },
+    Peacekeeper_Hideout: {
+      rezervbase: ['Bunker Hermetic'],
+    },
+    Jaeger_Hideout: {
+      woods: ['ZB-014'],
+    },
+    lab_ParkGate_sandbox_Mira_streets_Cardinal: {
+      laboratory: ['Parking Gate'],
+      sandbox: ['Mira Ave'],
+      tarkovstreets: ['Cardinal Appartments'],
+    },
+    lab_Elevator_1_sandbox_Mira: {
+      sandbox: ['Mira Ave'],
+    },
+    lab_Sewage_streets_Sewer: {
+      laboratory: ['Lab Sewage Conduit'],
+      tarkovstreets: ['Sewer River'],
+    },
+    lab_Hangar_streets_Expo: {
+      laboratory: ['Hangar Gate'],
+      tarkovstreets: ['Expo Checkpoint'],
+    },
+    sandbox_Scav_streets_Klimov_Int_Hole: {
+      sandbox: ['Scav Hideout'],
+      interchange: ['Fence Gap'],
+      tarkovstreets: ['Klimov Street'],
+    },
+    woods_NUN_streets_Crash: {
+      woods: ['Northern UN Roadblock'],
+      tarkovstreets: ['Crash Site'],
+    },
+    Inter_Railway_woods_UN_bigmap_RUAF: {
+      interchange: ['Railway'],
+      woods: ['UN Roadblock'],
+      bigmap: ['RUAF Roadblock'],
+    },
+    Inter_Ecom_bigmap_Crossroads_Shore_RtC: {
+      interchange: ['Emercom'],
+      bigmap: ['Crossroads'],
+      shoreline: ['Road to Customs'],
+    },
+    woods_FactGate_factory_Mtent: {
+      woods: ['Scav Bridge'],
+      factory4_day: ['Med tent gates'],
+      factory4_night: ['Med tent gates'],
+    },
+    woods_RUAF_bigmap_ScavCP: {
+      woods: ['RUAF Gate'],
+      bigmap: ['Scav CP'],
+    },
+    woods_Out_lighthouse_NorCP: {
+      woods: ['Outskirts'],
+      lighthouse: ['Northern CP'],
+    },
+    bigmap_1012_factory_Cellars: {
+      bigmap: ['ZB-1012'],
+      factory4_day: ['Cellars'],
+      factory4_night: ['Cellars'],
+    },
+    bigmap_FarCorner_factory_Gate3: {
+      bigmap: ['Factory Far Corner'],
+      factory4_day: ['Gate 3'],
+      factory4_night: ['Gate 3'],
+    },
+    bigmap_OldGas_factory_Gate0: {
+      bigmap: ['Old Gas Scav'],
+      factory4_day: ['Gate 0'],
+      factory4_night: ['Gate 0'],
+    },
+    bigmap_MilitaryCP_rezervbase_Scavlands: {
+      bigmap: ['Military Base CP'],
+      rezervbase: ['Scav lands'],
+    },
+    bigmap_RRtPort_shoreline_RBridge: {
+      bigmap: ['RR to Port'],
+      shoreline: ['Railway Bridge'],
+    },
+    bigmap_Boat_shoreline_Boat: {
+      bigmap: ['Smugglers Boat'],
+      shoreline: ['Pier Boat'],
+    },
+    rezervbase_Cliff_shoreline_Cliffs: {
+      rezervbase: ['Cliff'],
+      shoreline: ['Shoreline Northern Cliffs'],
+    },
+    rezervbase_Train_lighthouse_Industrial: {
+      rezervbase: ['Train Station'],
+      lighthouse: ['Industrial Gates'],
+    },
+    shoreline_PathLighthouse_lighthouse_PathShoreline: {
+      lighthouse: ['Path to Shoreline'],
+      shoreline: ['Path to Lighthouse'],
+    },
+  },
+  // 撤离点位置的显示名称（用于工具提示等）
+  offraid_positions: {
+    PlayerHideout: {
+      displayName: {
+        en: '玩家藏身处_安全屋',
+        ch: '玩家藏身处_安全屋',
+      },
+    },
+    GZHideout: {
+      displayName: {
+        en: '中心区城镇_联合银行',
+        ch: '中心区城镇_联合银行',
+      },
+    },
+    streetsHideout: {
+      displayName: {
+        en: '街区城镇_墓地',
+        ch: '街区城镇_墓地',
+      },
+    },
+    woodsHideout: {
+      displayName: {
+        en: '森林城镇_安德伍德',
+        ch: '森林城镇_安德伍德',
+      },
+    },
+    IntBigHideout: {
+      displayName: {
+        en: '立交桥、海关城镇_布条镇',
+        ch: '立交桥、海关城镇_布条镇',
+      },
+    },
+    ShorLightHideout: {
+      displayName: {
+        en: '灯塔、海岸线城镇_隧道',
+        ch: '灯塔、海岸线城镇_隧道',
+      },
+    },
+    All_Fence_Car: {
+      displayName: {
+        en: '黑商的车_通往所有黑车停车点',
+        ch: '黑商的车_通往所有黑车停车点',
+      },
+    },
+    Secret_Pass: {
+      displayName: {
+        en: '秘密通道_不知道通往哪里',
+        ch: '秘密通道_不知道通往哪里',
+      },
+    },
+    Mechanic_Hideout: {
+      displayName: {
+        en: '机械师据点_监控地堡门',
+        ch: '机械师据点_监控地堡门',
+      },
+    },
+    Skier_Hideout: {
+      displayName: {
+        en: '滑雪人据点_ZB1011',
+        ch: '滑雪人据点_ZB1011',
+      },
+    },
+    Peacekeeper_Hideout: {
+      displayName: {
+        en: '美商据点_地下仓库密闭门',
+        ch: '美商据点_地下仓库密闭门',
+      },
+    },
+    Jaeger_Hideout: {
+      displayName: {
+        en: '耶格据点_ZB014',
+        ch: '耶格据点_ZB014',
+      },
+    },
+    lab_ParkGate_sandbox_Mira_streets_Cardinal: {
+      displayName: {
+        en: '实验室-中心区-街区',
+        ch: '实验室-中心区-街区',
+      },
+    },
+    lab_Elevator_1_sandbox_Mira: {
+      displayName: {
+        en: '实验室电梯单向去中心区',
+        ch: '实验室电梯单向去中心区',
+      },
+    },
+    lab_Sewage_streets_Sewer: {
+      displayName: {
+        en: '实验室下水道-街区',
+        ch: '实验室下水道-街区',
+      },
+    },
+    lab_Hangar_streets_Expo: {
+      displayName: {
+        en: '实验室机库-街区',
+        ch: '实验室机库-街区',
+      },
+    },
+    sandbox_Scav_streets_Klimov_Int_Hole: {
+      displayName: {
+        en: '中心区-街区-立交桥',
+        ch: '中心区-街区-立交桥',
+      },
+    },
+    woods_NUN_streets_Crash: {
+      displayName: {
+        en: '森林-街区',
+        ch: '森林-街区',
+      },
+    },
+    Inter_Railway_woods_UN_bigmap_RUAF: {
+      displayName: {
+        en: '立交桥-森林-海关',
+        ch: '立交桥-森林-海关',
+      },
+    },
+    Inter_Ecom_bigmap_Crossroads_Shore_RtC: {
+      displayName: {
+        en: '立交桥-海关-海岸线',
+        ch: '立交桥-海关-海岸线',
+      },
+    },
+    woods_FactGate_factory_Mtent: {
+      displayName: {
+        en: '森林-工厂',
+        ch: '森林-工厂',
+      },
+    },
+    woods_RUAF_bigmap_ScavCP: {
+      displayName: {
+        en: '森林-海关',
+        ch: '森林-海关',
+      },
+    },
+    woods_Out_lighthouse_NorCP: {
+      displayName: {
+        en: '森林-灯塔',
+        ch: '森林-灯塔',
+      },
+    },
+    bigmap_1012_factory_Cellars: {
+      displayName: {
+        en: '海关-工厂',
+        ch: '海关-工厂',
+      },
+    },
+    bigmap_FarCorner_factory_Gate3: {
+      displayName: {
+        en: '海关-工厂',
+        ch: '海关-工厂',
+      },
+    },
+    bigmap_OldGas_factory_Gate0: {
+      displayName: {
+        en: '海关-工厂',
+        ch: '海关-工厂',
+      },
+    },
+    bigmap_MilitaryCP_rezervbase_Scavlands: {
+      displayName: {
+        en: '储备站与海关互通',
+        ch: '储备站与海关互通',
+      },
+    },
+    bigmap_RRtPort_shoreline_RBridge: {
+      displayName: {
+        en: '海关与海岸线互通',
+        ch: '海关与海岸线互通',
+      },
+    },
+    bigmap_Boat_shoreline_Boat: {
+      displayName: {
+        en: '海关与海岸线互通',
+        ch: '海关与海岸线互通',
+      },
+    },
+    rezervbase_Cliff_shoreline_Cliffs: {
+      displayName: {
+        en: '储备站与海岸线互通',
+        ch: '储备站与海岸线互通',
+      },
+    },
+    rezervbase_Train_lighthouse_Industrial: {
+      displayName: {
+        en: '储备站与灯塔互通',
+        ch: '储备站与灯塔互通',
+      },
+    },
+    shoreline_PathLighthouse_lighthouse_PathShoreline: {
+      displayName: {
+        en: '海岸线与灯塔互通',
+        ch: '海岸线与灯塔互通',
+      },
+    },
+  },
+  exfiltrations_config: {
+    //   bigmap: {
+    //     'Dorms V-Ex': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'ZB-1011': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'Old Gas Station': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'Trailer Park': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'Shack': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'ZB-1012': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     EXFIL_ZB013: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     "Smuggler's Boat": {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'RUAF Roadblock': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     Crossroads: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'Old Azs Gate': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+    //   woods: {
+    //     'un-sec': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'ZB-014': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'ZB-016': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName\n<size=60%><color="white">$offraidPositionDisplayName\n',
+    //     },
+    //     Outskirts: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'UN Roadblock': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+    //   rezervbase: {
+    //     EXFIL_Train: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     Alpinist: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+    //   interchange: {
+    //     'Saferoom Exfil': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'NW Exfil': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+    //   lighthouse: {
+    //   },
+    //   shoreline: {
+    //     'Road to Customs': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     'Pier Boat': {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+    //   tarkovstreets: {
+    //     E2: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     E4: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     E7: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //     scav_e2: {
+    //       override_tooltips_template: '<color="green"><size=90%>$exfilDisplayName',
+    //     },
+    //   },
+  },
+  exfiltrations_tooltips_template: '<color="green"><size=90%>$exfilDisplayName\n<size=60%><color="white">$offraidPositionDisplayName',
+  extracts_prompt_template: {
+    en: '撤离到 {0}',
+    ch: '撤离到 {0}',
+  },
+  transits_prompt_template: {
+    en: '移动到 {0}',
+    ch: '移动到 {0}',
+  },
+}

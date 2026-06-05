@@ -172,7 +172,7 @@ type Exfiltrations = ByMap<{
   [extractName: ExtractName]: OffraidPositionName[];
 }>;
 
-type Infiltrations = {
+export type Infiltrations = {
   [offraidPosition: OffraidPositionName]: ByMap<SpawnPointName[]>;
 };
 
@@ -223,6 +223,7 @@ type RawConfig = {
   enable_legacy_ptt_api?: boolean;
   bypass_exfils_override?: boolean;
   enable_all_vanilla_transits?: boolean;
+  vanilla_transit_destination?: Record<string, string>;
 };
 
 export type Config = Omit<

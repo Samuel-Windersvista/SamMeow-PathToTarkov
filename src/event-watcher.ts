@@ -140,9 +140,7 @@ export class EventWatcher {
           const profile = this.saveServer.getProfile(sessionId);
           const profileName = profile?.info?.username || 'unknown';
           const isHeadless = profileName.toLowerCase().includes('headless');
-          this.ptt.debug(
-            `Profile name: ${profileName}, Is headless: ${isHeadless}`,
-          );
+          this.ptt.debug(`Profile name: ${profileName}, Is headless: ${isHeadless}`);
 
           this.initRaidCache(sessionId);
           const raidCache = this.getRaidCache(sessionId);

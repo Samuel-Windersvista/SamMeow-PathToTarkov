@@ -1,5 +1,11 @@
 import type { IBodyHealth, IGlobals } from '@spt/models/eft/common/IGlobals';
-import type { IExit, ILocationBase, ISpawnPointParam } from '@spt/models/eft/common/ILocationBase';
+import type {
+  IExit,
+  ILocationBase,
+  ISpawnPointParam,
+  ITransit,
+} from '@spt/models/eft/common/ILocationBase';
+import type { ILocation } from '@spt/models/eft/common/ILocation';
 import type { ILogger } from '@spt/models/spt/utils/ILogger';
 import type { ConfigServer } from '@spt/servers/ConfigServer';
 import type { DatabaseServer } from '@spt/servers/DatabaseServer';
@@ -51,6 +57,7 @@ import { TradersAvailabilityService } from './services/TradersAvailabilityServic
 import { fixRepeatableQuestsForPmc } from './fix-repeatable-quests';
 import { KeepFoundInRaidTweak } from './keep-fir-tweak';
 import { ExfilsTooltipsTemplater } from './services/ExfilsTooltipsTemplater';
+import { getVanillaTransitDestination } from './config-analysis';
 import type { RaidCache } from './event-watcher';
 import type { AllLocalesInDb } from './services/LocaleResolver';
 
@@ -280,6 +287,34 @@ export class PathToTarkovController {
       // handle when a player took a vanilla transit
       this.debug(` Handling vanilla transit`);
       this.updateInfiltrationForPlayerSpawnPoints(locationBase);
+
+      // 追踪原版转移目标位置（仅对真正的目标地图生效，非 PTT transit）
+      if (!raidCache.transitTargetMapName && !raidCache.transitTargetSpawnPointId) {
+        const destinationMap = resolveMapNameFromLocation(locationBase.Id);
+        const sourceMapName = raidCache.currentLocationName
+          ? resolveMapNameFromLocation(raidCache.currentLocationName)
+          : null;
+
+        if (sourceMapName && this.isTransitDestination(sourceMapName, destinationMap)) {
+          const config = this.getConfig(sessionId);
+          const destination = getVanillaTransitDestination(
+            destinationMap,
+            config.infiltrations,
+            config.vanilla_transit_destination,
+          );
+
+          if (destination) {
+            this.debug(
+              ` Vanilla transit (${sourceMapName}→${destinationMap}) → updating offraid position to ${destination}`,
+            );
+            this.updateOffraidPosition(sessionId, destination);
+          } else {
+            this.debug(
+              ` Vanilla transit (${sourceMapName}→${destinationMap}) → could not determine offraid position for ${destinationMap}`,
+            );
+          }
+        }
+      }
     }
 
     if (raidCache && raidCache.transitTargetMapName && raidCache.transitTargetSpawnPointId) {
@@ -475,9 +510,14 @@ export class PathToTarkovController {
       this.logger.info(`=> PathToTarkov: player offraid position changed to '${offraidPosition}'`);
     }
 
-    const nbCleared = this.stashController.clearRoamingEmergencyStashOnExit(offraidPosition, sessionId);
+    const nbCleared = this.stashController.clearRoamingEmergencyStashOnExit(
+      offraidPosition,
+      sessionId,
+    );
     if (nbCleared > 0) {
-      this.logger.warning(`=> PathToTarkov: cleared ${nbCleared} item${nbCleared > 1 ? 's' : ''} from roaming emergency stash`);
+      this.logger.warning(
+        `=> PathToTarkov: cleared ${nbCleared} item${nbCleared > 1 ? 's' : ''} from roaming emergency stash`,
+      );
     }
 
     this.stashController.updateStash(offraidPosition, sessionId);
@@ -548,19 +588,25 @@ export class PathToTarkovController {
         const item = items[stashId];
 
         if (!item) {
-          this.logger.warning(`Path To Tarkov: VANILLA_STASH_ID '${stashId}' template not found in items, skipping`);
+          this.logger.warning(
+            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' template not found in items, skipping`,
+          );
           return;
         }
         const grid = item._props?.Grids?.[0];
         if (!grid) {
-          this.logger.warning(`Path To Tarkov: VANILLA_STASH_ID '${stashId}' has no Grids, skipping`);
+          this.logger.warning(
+            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' has no Grids, skipping`,
+          );
           return;
         }
         const gridProps = grid._props;
         if (gridProps) {
           gridProps.cellsV = size;
         } else {
-          this.logger.warning(`Path To Tarkov: VANILLA_STASH_ID '${stashId}' grid has no _props, skipping`);
+          this.logger.warning(
+            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' grid has no _props, skipping`,
+          );
         }
       });
 
@@ -1033,6 +1079,27 @@ export class PathToTarkovController {
     });
   }
 
+  /**
+   * 验证当前处理的 map 是否为原版转移的真实目标地图。
+   * 通过查找源地图的 transits 数组，比对 transit.location 与当前 locationBase.Id。
+   */
+  private isTransitDestination(sourceMapName: string, destinationMap: string): boolean {
+    if (!sourceMapName || sourceMapName === destinationMap) return false;
+
+    const locations = this.db.getTables()?.locations;
+    if (!locations) return false;
+
+    // ILocations 同时包含位置字段（ILocation）和 meta 字段（ILocationsBase）
+    // 需要排除非位置字段
+    const sourceLocation = (locations as Record<string, ILocation | undefined>)[sourceMapName];
+    if (!sourceLocation?.base?.transits) return false;
+
+    return sourceLocation.base.transits.some((transit: ITransit) => {
+      const transitTarget = resolveMapNameFromLocation(transit.location);
+      return transitTarget === destinationMap;
+    });
+  }
+
   private updateLocationBaseExits(locationBase: ILocationBase, sessionId: string): void {
     if (!this.isLocationBaseAvailable(locationBase)) {
       return;
@@ -1112,7 +1179,9 @@ export class PathToTarkovController {
           return otherPttProfile.PathToTarkov.offraidPosition;
         }
       }
-      this.logger.warning(` No main profile found for headless client ${profileName}, using default`);
+      this.logger.warning(
+        ` No main profile found for headless client ${profileName}, using default`,
+      );
     }
 
     if (!profile.PathToTarkov) {

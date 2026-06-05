@@ -15,7 +15,7 @@
   // Check the `Examples/OverrideByProfiles` config for a full usage example
   override_by_profiles: {},
 
-  debug_exfiltrations_tooltips_locale: 'en',
+  //debug_exfiltrations_tooltips_locale: 'en',
 
   restrictions_in_raid: {
     // roubles
@@ -478,6 +478,24 @@
         tu: 'Along the railroad line between shoreline and customs',
       },
       access_via: ['RefHideout'],
+    },
+    // Flea Market (Ragfair)
+    ragfair: {
+      access_via: [
+        'PeacekeeperHideout',
+        'JaegerHideout',
+        'InterchangeScavCamp',
+        'SkierHideout',
+        'MechanicHideout',
+        'TherapistHideout',
+        'PraporHideout',
+        'RefHideout',
+        'PeacekeeperHideout',
+        'PeacekeeperHideout',
+        'PeacekeeperHideout',
+        'PeacekeeperHideout',
+        'PeacekeeperHideout',
+      ],
     },
     // Priscilu
     '6748adca5c70634464b214a8': {

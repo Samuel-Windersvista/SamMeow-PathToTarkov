@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [6.2.0] - 2026-06-05
+
+### Added
+
+- **原版转移位置追踪**: 使用原版转移（vanilla transit）从地图 A 转移到地图 B 后，PTT 现在能自动追踪并更新你的 offraid 位置。仓库访问、商人可用性和回血机制都将与新位置同步。通过反向 infiltrations 自动推导 + 可选 `vanilla_transit_destination` 配置映射实现
+
 ### Fixed
 
 - **撤离点全部消失**：当 `/PathToTarkov/CurrentLocationData` 获取失败时，不再错误地禁用全部撤离点，改为保留原版撤离点作为兜底

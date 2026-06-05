@@ -1,0 +1,247 @@
+﻿{
+  general: {
+    enabled: true, // 启用或禁用模组
+    debug: false, // 启用调试模式，目前无功能
+  },
+  secureContainersOptions: {
+    // 下面是所有安全容器选项的主开关。灵感来自 Trap 的 Progressive Stash，从零开始重新设计。默认禁用，以免混淆现有配置文件。
+    enabled: true, // 启用安全容器更改
+    progressiveContainers: {
+      // 从 2x2 的腰包式容器开始您的新角色，并通过复杂、昂贵但有趣且公平的定制容器工艺，一路升级到伽马级。
+      enabled: true,
+      // 收集者任务只需 10 级即可开始。你不再需要完成所有其他任务，只需要物品。但是，别以为这很容易，还有一个额外的终极挑战条件在等着你。比起传统的“磨到 55 级”，这应该会更有趣。
+      collectorQuestRedone: true,
+    },
+    // 腰包是 2x4，阿尔法现在是 3x3（和 EoD 一样），贝塔 3x4，伊普西隆 3x5，伽马 4x5，卡帕 5x5
+    biggerContainers: true,
+  },
+  hideoutOptions: {
+    // 下面是所有隐藏处选项的主开关。
+    enabled: true,
+    stashOptions: {
+      // 下面是所有储藏选项的主开关。灵感来自 Trap 的 Progressive Stash。
+      enabled: true,
+      // 使每个新配置文件从 LVL1 储藏开始
+      progressiveStash: true,
+      // 更大的储藏选择，从 28/38/48/68 到 50/100/150/200 行。
+      biggerStash: true,
+      // 将建造所需的现金减少 10 倍
+      lessCurrencyForConstruction: true,
+      // 将阶段建造（Prapor、Ragman 和 Peacekeeper）的忠诚度等级要求降低 1。
+      easierLoyalty: false,
+    },
+    hideoutContainers: {
+      enabled: true,
+      // 略微增强基本藏匿容器：药品箱 7x7 -> 10x10, Holodilnick 8x8 -> 10x10, 杂志箱 7x7 -> 7x10, 物品箱 8x8 -> 10x10, 武器箱 5x10 -> 6x10, 钥匙工具 -> 5x5
+      biggerHideoutContainers: true,
+      // 对 SICC 案例进行巨大的 QoL 修正，使其不再糟糕，并直接升级为 Docs。在此同时，允许它持有钥匙工具。这是你在跳蚤市场上无法轻易获得的终极游戏道具，加上所有其他软核改动，所以谁在乎呢。允许物品列表：比特币实物、GP 硬币、Veritas 吉他拨片、钥匙卡套、信息、钥匙、地图、金钱、带有 Prokill 奖章的链条、黄金骷髅戒指、Dogtag BEAR、Dogtag USEC、安全闪存盘、钥匙工具。
+      siccCaseBuff: true,
+    },
+    fasterBitcoinFarming: {
+      // 修改基础挖矿时间，大幅提高每个 GPU 的效率（从 ~4% 提高到 50%）。这意味着每增加一个 GPU 都会对挖矿时间产生更大的影响，而 Lvl3 比特币农场则非常有利可图。例如 - 原版 1x GPU：40 小时 17 分钟，50x GPU：13 小时 20 分钟赚取 1 个比特币。默认软核设置 - 1x GPU：20 小时 8 分钟，50x GPU：每比特币 0 小时 47 分钟。Revert_Bitcoin_Price_To_v012 选项将比特币价格从 0.13 版的 22.5 万降至 0.12 版的 10 万，这是为了平衡。
+      enabled: true,
+      setBitcoinPriceTo100k: false,
+      baseBitcoinTimeMultiplier: 1.5,
+      gpuEfficiency: 1,
+    },
+    fasterCraftingTime: {
+      // 除比特币、月光酒和纯净水外，更快地制作所有配方。
+      enabled: true,
+      baseCraftingTimeMultiplier: 3,
+      hideoutSkillExpFix: {
+        // 实验性修复隐藏处管理技能的每次制作时间经验值。
+        enabled: true,
+        hideoutSkillExpMultiplier: 10,
+      },
+      fasterMoonshineProduction: {
+        // 更快地生产月光酒。
+        enabled: true,
+        baseCraftingTimeMultiplier: 0.3,
+      },
+      fasterPurifiedWaterProduction: {
+        // 更快地生产纯净水。
+        enabled: true,
+        baseCraftingTimeMultiplier: 0.3,
+      },
+      fasterCultistCircle: {
+        enabled: true,
+        baseCraftingTimeMultiplier: 0.5,
+      },
+    },
+    fasterHideoutConstruction: {
+      // 让隐藏处的建造速度更快。
+      enabled: true,
+      hideoutConstructionTimeMultiplier: 50,
+    },
+    fuelConsumption: {
+      // 为了平衡上述所有功能，油耗会增加。现在，你不得不考虑燃油经济性了。虽然有一点，但还是要考虑。
+      enabled: true,
+      fuelConsumptionMultiplier: 4,
+    },
+    scavCaseOptions: {
+      // 下面是所有 scavcase 功能的主开关。
+      enabled: true,
+      // 建议：始终启用。将其视为清道夫奖励池的 SPT 补丁/修复。保守地过滤掉大量垃圾/无用物品（例如价值小于 5k 的武器专用改装件、瞄准镜、防毒块、螺纹适配器、弹夹、支架等）以及 OP/老板/开发者/损坏/任务等物品。确保您总能获得有价值和/或可用的物品。非常安全，即使你不想要其他功能。这也应该从 Fence 中过滤掉这些物品。
+      betterRewards: true,
+      fasterScavcase: {
+        // 更快地启动清扫箱，速度倍增器在下面。x10 感觉刚刚好。
+        enabled: true,
+        speedMultiplier: 0.5,
+      },
+      // 对搜刮箱奖励进行了重大调整，极大地提升了单人游戏体验。将所有现金奖励改为酒精奖励，以获得更贴近传说的体验（Pevko -> 伏特加 -> 威士忌 -> 月光 -> 英特尔）。彻底改变内部奖励层级（普通：20,000 以下，稀有：20,000 至 60,000，超级稀有：60,000 至 1,200,000），使每一启动层级都有价值、公平且可针对不同物品层级。Pevko 非常快，可提供 2 到 3 件普通物品。伏特加能提供 3 到 4 件普通物品，并有几率提供 1 件稀有物品。威士忌能提供 4 到 5 件普通物品和 1 到 2 件稀有物品。月光酒适合赌博，可获得 2 到 3 件普通物品，0 到 3 件稀有物品，1 到 2 件超级稀有物品。情报夹最稳定，2 到 3 件普通物品，3 到 5 件稀有物品，0 到 1 件超级稀有物品。
+      rebalance: true,
+    },
+    // 允许在严重肌肉疼痛的情况下以 25% 的效率继续健身训练。
+    allowGymTrainingWithMusclePain: true,
+  },
+  economyOptions: {
+    // 下面是所有经济选项的主开关
+    enabled: true,
+    // 完全禁用跳蚤市场，以获得真正的硬核体验。但仍可使用界面并查看交易商报价。覆盖以下所有其他跳蚤市场更改。
+    disableFleaMarketCompletely: false,
+    priceRebalance: {
+      // 本修改器的核心功能。完全删除 LIVE 中的 SPT 跳蚤价格快照，并将其与内部手册/交易商价格相匹配。其他一切都将围绕此进行平衡。不建议禁用。
+      enabled: false,
+      // 修复重要项目，如 Intel 文件夹和军用闪存盘
+      itemFixes: true,
+    },
+    pacifistFleaMarket: {
+      // 本模块的核心功能。跳蚤市场上只能购买药品、易货物品、食物和信息物品。使用硬编码的 fleaWhitelist 数组作为过滤器。不建议禁用。
+      enabled: false,
+      // 跳蚤市场上有手工艺品和贸易商易货所用物品的小列表。使用硬编码的 itemWhitelist 数组。
+      whitelist: {
+        enabled: true,
+        priceMultiplier: 2,
+      },
+      questKeys: {
+        // 跳蚤上只有随机的 QUEST 密钥。使用硬编码的 questKeys 数组。
+        enabled: true,
+        priceMultiplier: 3,
+      },
+      markedKeys: {
+        // 在跳蚤市场上可以买到有标记的钥匙。
+        enabled: true,
+        priceMultiplier: 5,
+      },
+    },
+    barterEconomy: {
+      // 本模块的核心功能。只允许使用其他随机 FiR 或手工物品在跳蚤上购买物品。使用硬编码的 fleaBarterBlacklist 阵列作为允许物品的过滤器（药品、易货物品、食物和信息物品已启用，兴奋剂和燃料除外）。不建议禁用。
+      enabled: true,
+      // 允许用现金购买小部分随机物品。0 是真正的以物易物的经济（最便宜的物品如 AA 电池除外，但这是 SPT-AKI 的限制），我认为这是玩这个模块的首选方式，但有时可能有点太难了。5％ 似乎是个不错的数字，可以让生活变得更轻松一些，避免物品死锁。建议：0 至 15。
+      cashOffersPercentage: 10,
+      // 物品列表与易货价值之间价格差异的 ± 百分比。数字越大，随机交易的种类就越多，例如，您可以看到用一个 Defibrillator（价值 22.4 万）换一个 Lion（价值 16.2 万）或一个 Tank Battery（价值 33 万）。这一核心功能让整个模式变得有趣、随机、引人入胜，并刺激人们在战火纷飞的社会中拼搏。你可以幸运地得到一笔大买卖，也可能急需一件价值高得离谱的物品，但你只有它所要求的昂贵物品。此外，更多的差异意味着更容易遇到你有物品的出价，也更容易交易。建议：20-50
+      barterPriceVariance: 30,
+      offerItemCount: {
+        // 一件物品最多有 XX 个不同的报价。由于某些原因，过低的数量会导致 SPT 服务器崩溃，在已完成的交易中不断出现客户端错误。不管怎样，多一些随机交易差异，这很有趣。
+        min: 5,
+        max: 13,
+      },
+      nonStackableCount: {
+        // 每项优惠最多可提供 X 件商品。感觉不错。多抢点东西，说不定能派上用场。
+        min: 1,
+        max: 4,
+      },
+      // 限制以物易物的最大数量。默认为最大 2 换 1。
+      itemCountMax: 4,
+    },
+    otherFleaMarketChanges: {
+      // 下面是所有其他跳蚤市场更改的主开关。
+      enabled: true,
+      // 不建议更改，请使用下面的 TraderChanges 选项。如果更改下面的选项，将允许在跳蚤市场上销售（默认为不在跳蚤市场上销售）。将允许您像在原版中一样出售武器和其他被软核封锁的物品。未经游戏测试和平衡，不建议启用。
+      sellingOnFlea: false,
+      // PMC 级跳蚤市场的开放时间是：
+      fleaMarketOpenAtLevel: 10,
+      // 略微提高跳蚤市场的价格，以刺激掠夺和手工制作，而不是在跳蚤市场上购买所有物品。在以物易物经济和变异功能启用的情况下，你仍能获得很多低于实际物品价值的交易。喧嚣！
+      fleaPricesIncreased: 1.5,
+      // 跳蚤市场只提供完好无损的物品。
+      fleaPristineItems: false,
+      // 像个男人，不要改变这一点。因为差异变化，这是无限赚钱的边缘作弊选项。
+      onlyFoundInRaidItemsAllowedForBarters: false,
+    },
+  },
+  traderChanges: {
+    // 下面是所有交易员更改的主开关
+    enabled: true,
+    // 调整贸易商出售物品的评价（忠诚度 1 级时，从 Prapor 50%、Therapist 63%、Ragman 62%、Jaeger 60%、Mechanic 56%、Peacekeeper 45%、Skier 49% --> Prapor 60%、Therapist 64%、Ragman 63%、Jaeger 62%、Mechanic 61%、Peacekeeper 58%、Skier 59%）。此外，每升一级忠诚度都会提高 5% 的销售评估，因此例如在 LL4 级时，Prapor 可以用物品价值的 75% 购买物品。
+    betterSalesToTraders: true,
+    // 削弱 Therapist 的购买类别（她不再购买所有以物易物的物品，而只购买药品和生活用品，有利于交易者的多样性），允许 Ragman 购买贵重物品，允许 Skier 购买信息物品。
+    alternativeCategories: true,
+    pacifistFence: {
+      // 为了配合本模块的主题，Fence 也只出售和平主义物品。他的价格取决于 Scav 的业力，因此业力为 6 时，他出售物品的价格几乎与 Therapist 从您这里购买物品的价格相同。
+      enabled: true,
+      numberOfFenceOffers: 15,
+    },
+    // 重新平衡藏匿箱的成本，使其价格和易货贸易更加公平合理。同时更改 LEDX 狗牌易货。
+    reasonablyPricedCases: true,
+    // 实验选项，使 Skier 在所有交易和任务奖励中使用欧元，主要是为了增加乐趣和多样性。相应调整各种物品和忠诚度等级。默认关闭，因为需要调整现有配置文件的销售总和（可以手动调整，在 %profileID%.json 中找到 TradersInfo，在 58330581ace78e27b8b10cee 键中将销售总和除以 115，不留余数），除非你启用此选项后开始新配置文件。
+    skierUsesEuros: true,
+    biggerLimits: {
+      // 从贸易商处进货的更大限额
+      enabled: true,
+      multiplier: 2.0,
+    },
+  },
+  craftingChanges: {
+    // 下面是所有制作更改的主开关。
+    enabled: true,
+    // 围绕组件稀有度、实用性、贸易商价格和简单的传说逻辑，对制作配方进行重大调整。有一些削弱，但也有很多巨大的提升。主要的想法是让大多数工艺变得有用和/或有利可图。
+    craftingRebalance: true,
+    // 为 3-b-TG、肾上腺素、L1、AHF1、CALOK、眼科视网膜镜、扎古斯坦、奥多布斯和奥洛洛添加了新的符合库斯顿传说且平衡的制作配方。
+    additionalCraftingRecipes: true,
+  },
+  insuranceChanges: {
+    // 重做保险。让这两种交易者发挥不同的作用。默认Prapor 是“可靠的”，有 80% 的几率返还，费用为物品价值的 25%。Therapist 有 60% 的几率返还，但费用仅为 5%，例如，可用于快速返还廉价任务装备或普通赌博。同时将保险储存时间提升至整月。还将保留武器附件的几率提高到 50%。
+    enabled: true,
+    praporInsuranceChanges: {
+      enabled: true,
+      returnChance: 70,
+      returnTime: {
+        min: 240,
+        max: 360,
+      },
+      insuranceCostPercentage: 80,
+    },
+    therapistInsuranceChanges: {
+      enabled: true,
+      returnChance: 60,
+      returnTime: {
+        min: 120,
+        max: 240,
+      },
+      insuranceCostPercentage: 50,
+    },
+  },
+  otherTweaks: {
+    // 下面是所有其他选项的主开关。
+    enabled: true,
+    // 增强生命值、狙击、手术、MagDrills、武器处理技能的升级速度（x10）。
+    skillExpBuffs: false,
+    // ZiD SP-81 26x75 信号手枪可放置在特殊插槽中，死后不会被移除。
+    signalPistolInSpecialSlots: true,
+    // 撤销 BSG 默认检查所有物品的决定。
+    unexaminedItemsAreBack: false,
+    // 加快物品检查速度，与 unexaminedItemsAreBack 配合使用效果更佳。
+    fasterExamineTime: true,
+    // 取消背包限制（弹药箱、药箱等容器和其他背包）。我再也不会在 314 中看到不可掠夺的医药箱了...
+    removeBackpackRestrictions: true,
+    // 取消昂贵物品的丢弃限制（BSG 的反 RTM 措施）。
+    removeDiscardLimit: true,
+    // Reshala 总是有他的金色 TT。
+    reshalaAlwaysHasGoldenTT: true,
+    // 更大的子弹堆叠
+    biggerAmmoStacks: {
+      enabled: true,
+      stackMultiplier: 5,
+    },
+    // 弹挂甲与护甲冲突
+    vestsBlockArmor: false,
+    // 更好地开始任务（危机）。
+    questChanges: true,
+    // 移除战利品限制
+    removeRaidItemLimits: true,
+    // Rubles stack to 1kk, Euro and Dollars to 100k, GP to 100.
+    biggerCurrencyStacks: false,
+    // Allow 1x1 cases (DOGTAG_CASE, INJECTOR_CASE, KEY_TOOL, KEYCARD_HOLDER_CASE, SIMPLE_WALLET, WZ_WALLET) in special slots.
+    smallContainersInSpecialSlots: false,
+  },
+}

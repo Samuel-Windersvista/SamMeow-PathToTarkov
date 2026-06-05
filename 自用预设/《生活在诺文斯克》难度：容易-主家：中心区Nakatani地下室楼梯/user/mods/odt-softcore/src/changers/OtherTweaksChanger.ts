@@ -1,0 +1,278 @@
+import { DependencyContainer } from 'tsyringe';
+import { OtherTweaks } from '../types';
+import { ItemTpl } from '@spt/models/enums/ItemTpl';
+import { ItemType } from '@spt/models/eft/common/tables/ITemplateItem';
+import { ITemplateItem } from '@spt/models/eft/common/tables/ITemplateItem';
+import { BaseClasses } from '@spt/models/enums/BaseClasses';
+import { BaseChanger } from './BaseChanger';
+
+export class OtherTweaksChanger extends BaseChanger {
+  private items: Record<string, ITemplateItem> | undefined;
+
+  constructor(container: DependencyContainer) {
+    super(container);
+    this.items = this.tables.templates?.items;
+  }
+
+  public apply(config: OtherTweaks) {
+    if (!config.enabled) {
+      return;
+    }
+
+    try {
+      if (config.skillExpBuffs) {
+        this.doSkillExpBuffs();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doSkillExpBuffs failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.signalPistolInSpecialSlots) {
+        this.doSignalPistolInSpecialSlots();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doSignalPistolInSpecialSlots failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.unexaminedItemsAreBack || config.fasterExamineTime || config.removeDiscardLimit) {
+        this.doItemLevelTweaks(config);
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doItemLevelTweaks failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.removeBackpackRestrictions) {
+        this.doRemoveBackpackRestrictions();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doRemoveBackpackRestrictions failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.reshalaAlwaysHasGoldenTT) {
+        this.doReshalaAlwaysHasGoldenTT();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doReshalaAlwaysHasGoldenTT failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.biggerAmmoStacks.enabled) {
+        this.doBiggerAmmoStacks(config.biggerAmmoStacks.stackMultiplier);
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doBiggerAmmoStacks failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.vestsBlockArmor) {
+        this.dovestsBlockArmor();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: dovestsBlockArmor failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.questChanges) {
+        this.doQuestChanges();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doQuestChanges failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.removeRaidItemLimits) {
+        this.doRemoveRaidItemLimits();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doRemoveRaidItemLimits failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.biggerCurrencyStacks) {
+        this.doCurrencyStack();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doCurrencyStack failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+
+    try {
+      if (config.smallContainersInSpecialSlots) {
+        this.doSmallContainersInSpecialSlots();
+      }
+    } catch (error) {
+      this.logger.warning(
+        'OtherTweaks: doSmallContainersInSpecialSlots failed gracefully. Send bug report. Continue safely.',
+      );
+      console.warn(error);
+    }
+  }
+
+  private doSkillExpBuffs() {
+    const globals = this.tables.globals;
+
+    globals!.config.SkillsSettings.Vitality.DamageTakenAction *= 10;
+    globals!.config.SkillsSettings.Sniper.WeaponShotAction *= 10;
+    globals!.config.SkillsSettings.Surgery.SurgeryAction *= 10;
+    Object.values(globals!.config.SkillsSettings.MagDrills).forEach(x => x * 10);
+    globals!.config.SkillsSettings.WeaponTreatment.SkillPointsPerRepair *= 100;
+  }
+
+  doSignalPistolInSpecialSlots() {
+    this.pushToSpecialSlots(ItemTpl.SIGNALPISTOL_ZID_SP81_26X75_SIGNAL_PISTOL);
+  }
+
+  private doItemLevelTweaks(config: OtherTweaks) {
+    if (!this.items) {
+      this.logger.warning('OtherTweaksChanger: doItemLevelTweaks: items not found');
+      return;
+    }
+
+    const skipUnexaminedParents = new Set([
+      BaseClasses.BUILT_IN_INSERTS,
+      BaseClasses.MAGAZINE,
+      BaseClasses.CYLINDER_MAGAZINE,
+      BaseClasses.ARMOR_PLATE,
+    ]);
+
+    for (const item of Object.values(this.items)) {
+      if (config.unexaminedItemsAreBack) {
+        if (!skipUnexaminedParents.has(item._parent) && item._props.ExaminedByDefault) {
+          item._props.ExaminedByDefault = false;
+        }
+      }
+      if (config.fasterExamineTime && item._props.ExamineTime) {
+        item._props.ExamineTime = 0.2;
+      }
+      if (config.removeDiscardLimit && item._type === ItemType.ITEM) {
+        item._props.DiscardLimit = -1;
+      }
+    }
+  }
+
+  doRemoveBackpackRestrictions() {
+    for (const item of Object.values(this.items)) {
+      if (item._type !== ItemType.ITEM) {
+        continue;
+      }
+      if (JSON.stringify(item).indexOf('ExcludedFilter') > -1) {
+        const filtered = item._props?.Grids?.[0]?._props?.filters[0]?.ExcludedFilter;
+        if (filtered?.includes(ItemTpl.CONTAINER_AMMUNITION_CASE)) {
+          if (item._props.Grids?.[0]._props.filters[0].ExcludedFilter) {
+            item._props.Grids[0]._props.filters[0].ExcludedFilter = [];
+          }
+        }
+      }
+    }
+  }
+
+  doReshalaAlwaysHasGoldenTT() {
+    const reshala = this.tables.bots!.types.bossbully;
+    reshala.chances.equipment.Holster = 100;
+    reshala.inventory.equipment.Holster = { '5b3b713c5acfc4330140bd8d': 1 };
+  }
+
+  doBiggerAmmoStacks(stackMultiplier: number) {
+    for (const item of Object.values(this.items)) {
+      if (item._parent === BaseClasses.AMMO && item._props.StackMaxSize) {
+        item._props.StackMaxSize *= stackMultiplier;
+      }
+    }
+  }
+
+  dovestsBlockArmor() {
+    for (const item of Object.values(this.items)) {
+      if (item._props.RigLayoutName) {
+        item._props.BlocksArmorVest = false;
+      }
+    }
+  }
+
+  doQuestChanges() {
+    const crisis = this.tables.templates!.quests['60e71c48c1bfa3050473b8e5'];
+    crisis.conditions.AvailableForStart[1].value = 30;
+
+    for (const quest of Object.values(this.tables.templates!.quests)) {
+      if (quest.QuestName?.includes('Drip-Out')) {
+        quest.conditions.AvailableForFinish.find(x => x.conditionType === 'HandoverItem').value =
+          10;
+        quest.conditions.AvailableForFinish.find(x => x.conditionType === 'CounterCreator').value =
+          20;
+      }
+    }
+  }
+
+  doRemoveRaidItemLimits() {
+    const globals = this.tables.globals;
+    globals!.config.RestrictionsInRaid = [];
+  }
+
+  doCurrencyStack() {
+    this.items![ItemTpl.MONEY_EUROS]._props.StackMaxSize = 100000;
+    this.items![ItemTpl.MONEY_DOLLARS]._props.StackMaxSize = 100000;
+    this.items![ItemTpl.MONEY_GP_COIN]._props.StackMaxSize = 100;
+    this.items![ItemTpl.MONEY_ROUBLES]._props.StackMaxSize = 1000000;
+  }
+
+  doSmallContainersInSpecialSlots() {
+    const tools = [
+      ItemTpl.CONTAINER_DOGTAG_CASE,
+      ItemTpl.CONTAINER_INJECTOR_CASE,
+      ItemTpl.CONTAINER_KEY_TOOL,
+      ItemTpl.CONTAINER_KEYCARD_HOLDER_CASE,
+      ItemTpl.CONTAINER_SIMPLE_WALLET,
+      ItemTpl.CONTAINER_WZ_WALLET,
+    ];
+
+    for (const tool of tools) {
+      this.pushToSpecialSlots(tool);
+    }
+  }
+
+  pushToSpecialSlots(itemID) {
+    const pockets = [ItemTpl.POCKETS_1X4_SPECIAL, ItemTpl.POCKETS_1X4_TUE];
+
+    for (const pocket of pockets) {
+      for (const slot of this.items[pocket]._props.Slots) {
+        const allowedItems = slot._props.filters[0].Filter;
+
+        if (!allowedItems.includes(itemID)) {
+          allowedItems.push(itemID);
+        }
+      }
+    }
+  }
+}

@@ -18,7 +18,7 @@ Players have the freedom to create their own unique paths by customizing offraid
 - **Hideout Restrictions:** Hideout features are disabled when the player is not at the main stash location.
 - **Trader Access Control:** Traders are available only at certain offraid positions.
 - **Extracts Overhaul:** Exfiltration points allow players to choose between multiple transit options or offraid positions at extracts.
-- **Multiplayer compatible:** Path To Tarkov is fully compatible with [Fika](https://github.com/project-fika). Each player has his own offraid position
+- **Multiplayer compatible:** Path To Tarkov is fully compatible with [Fika](https://github.com/project-fika). Each player has his own offraid position. The mod works seamlessly in both single-player and multiplayer modes without requiring separate installations
 - **Condition-Based Features:** Certain offraid locations toggle hydration, energy, and health restoration effects, as defined in the configuration.
 - **Quality of Life Features:** Players can adjust in-raid restriction limits (for bringing more money during the travel). There is also a FoundInRaid tweak applied by default.
 - **Highly customizable:** giving players complete control to adapt and fine-tune their gameplay experience.

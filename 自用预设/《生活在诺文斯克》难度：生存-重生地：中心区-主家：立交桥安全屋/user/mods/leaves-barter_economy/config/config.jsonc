@@ -1,0 +1,241 @@
+{
+  "dumpTiersToFile": false, //将层级列表转储到\mods\Leaves-BarterEconomy\output\目录下
+
+  //模组化商人应兼容，已测试支持No;Hurry的kokohekmatyar和lotus商人。
+  "tradersToBarter": [
+    //本模组会在服务器控制台输出所有已安装商人的ID，方便查找。
+    "5a7c2eca46aef81a7ca2145d", //机械师
+    "5ac3b934156ae10c4430e83c", //服装商
+    "5c0647fdd443bc2504c2d371", //耶格
+    "54cb50c76803fa8b248b4571", //鹅商
+    "54cb57776803fa99248b456e", //大妈
+    "5935c25fb3acc3127c3d8cd9", //美商
+    "58330581ace78e27b8b10cee", //滑雪人
+    "668aaff35fd574b6dcc4a686", //画家
+    "6688d464bc40c867f60e7d7e", //蝎子
+    "6758f03d55bf9943a7b14e47", //不明生还者
+    "67b67103b32c5563e508998a", //Epakim
+    "66bf757f27d0b097db0acea5", //Artem
+    "bd3a8b28356d9c6509966546", //Badger
+    "67768b19fa281ca31708b187", //友好PMC商人-骑士
+    "6789374aebcb3ad4c6e073bd",
+    "6789373b0f5ecebf0bc152d5",
+    "678937229797bd983dca2137",
+
+    "66f0eaa93f6cc015bc1f3acb", //Requisitions
+  ],
+
+  //玩家提供给商人的物品分类，multi为分类的价值乘数。
+  "barterCategories": {
+    // "5efb0da7a29a85116f6ea05f": { "multi": 1.0 }, //9x19mm PBP gzh
+    // "5c925fa22e221601da359b7b": { "multi": 1.0 }, //9x19mm AP 6.3
+    // "5c0d5e4486f77478390952fe": { "multi": 1.0 }, //5.45x39mm PPBS gs Igolnik
+    // "601949593ae8f707c4608daa": { "multi": 1.0 }, //5.56x45mm SSA AP
+    // "54527ac44bdc2d36668b4567": { "multi": 1.0 }, //5.56x45mm M855A1
+    // "5efb0c1bd79ff02a1f5e68d9": { "multi": 1.0 }, //7.62x51mm M993
+    // "59e0d99486f7744a32234762": { "multi": 1.0 }, //7.62x39mm BP gzh
+    // "601aa3d2b2bcb34913271e6d": { "multi": 1.0 }, //7.62x39mm MAI AP
+    // "560d61e84bdc2da74d8b4571": { "multi": 1.0 }, //7.62x54mm R SNB gzh
+
+    "57864a3d24597754843f8721": { "multi": 2.0 }, //Jewelry
+    "5448ecbe4bdc2d60728b4568": { "multi": 1.0 }, //Info items
+    "5448e8d04bdc2ddf718b4569": { "multi": 1.5 }, //Food
+    "5448e8d64bdc2dce718b4568": { "multi": 1.5 }, //Drinks
+    "5448f3a64bdc2d60728b456a": { "multi": 2.0 }, //Stimulator
+    "5485a8684bdc2da71d8b4567": { "multi": 1.0 }, //ammo
+    "5d235b4d86f7742e017bc88a": { "multi": 1.0 }, //GP币
+    "59faff1d86f7746c51718c9c": { "multi": 1.0 }, //比特币
+  },
+
+  //调整商人出售物品的父类价值乘数（例如枪械类价格过高，故降低）。
+  "valueMultipliers": {
+    "5447bed64bdc2d97278b4568": { "multi": 1.75 }, //机枪
+    "5447b6254bdc2dc3278b4568": { "multi": 1.75 }, //狙击步枪
+    "5447b5e04bdc2d62278b4567": { "multi": 1.75 }, //冲锋枪
+    "5447b6094bdc2dc3278b4567": { "multi": 1.75 }, //霰弹枪
+    "5447b5cf4bdc2d65278b4567": { "multi": 1.75 }, //手枪
+    "617f1ef5e8b54b0998387733": { "multi": 1.75 }, //左轮手枪
+    "5447b6194bdc2d67278b4567": { "multi": 1.75 }, //射手步枪
+    "5447b5f14bdc2d61278b4567": { "multi": 1.75 }, //突击步枪
+    "5447b5fc4bdc2d87278b4567": { "multi": 1.75 }, //卡宾枪
+    "5447bedf4bdc2d87278b4568": { "multi": 1.75 }, //榴弹发射器
+  },
+
+  "tiers": [1, 2, 3, 5, 7, 10, 15], //层级越多交易越"公平"，但会减少交易的随机性。
+  "loyaltyMultiplier": [0.9, 1.1, 1.3, 1.5], //按商人忠诚度等级调整物品价值。默认设置使前期稍易，后期稍难。
+
+  //这些物品类别不会被转化为易货。（强烈建议不要移除弹药）
+  "traderCategoriesBlacklist": [
+    "5485a8684bdc2da71d8b4567", //Ammo
+    "5447e0e74bdc2d3c308b4567", //Special Items
+    "5b7c710788a4506dec015957", //Lucky Scav Junk box
+    "5aafbcd986f7745e590fff23", //Medicine case
+    "66326bfd46817c660d015123", //item case
+    "543be5dd4bdc2deb348b4569", //Money
+    "5448bc234bdc2d3c308b4569", //Magazines
+  ],
+
+  //交易黑名单。在此输入具体交易。ID 可在 \Spt_Data\Server\database\traders\<id>\assort.json 中找到。
+  "tradeBlacklist": ["677536c9b06e57fd5c0e09e4", "677536cdb06e57fd5c0e0b13"],
+
+  "specificItemBlacklist": [
+    "661cb36922c9e10dc2d9514b", //黄金钥匙包
+    "661cb36f5441dc730e28bcb0", //黄金钥匙卡盒
+    "661cb372e5eb56290da76c3e", //黄金钥匙链1
+    "661cb3743bf00d3d145518b3", //黄金钥匙链2
+    "661cb376b16226f648eb0cdc", //黄金钥匙链3
+  ],
+
+  "enableItemBlacklist": true, //启用物品黑名单（禁止替换包含黑名单物品的交易）
+  //默认包含这些物品的交易不会被替换
+  "tradeItemBlacklist": [
+    "59f32bb586f774757e1e8442", //BEAR狗牌
+    "59f32c3b86f77472a31742f0", //USEC狗牌
+  ],
+
+  //覆盖特定物品的交易价值（调整过低或过高的定价）
+  "tradeValueOverrides": {
+    "59fb023c86f7746d0d4b423c": 350, //武器箱
+    "567143bf4bdc2d1a0f8b4567": 30, //手枪箱
+    "5d235bb686f77443f4331278": 600, //SICC箱
+    "59fb042886f7746c5005a7b2": 350, //物品箱
+    "5c94bbff86f7747ee735c08f": 30, //泰拉集团实验室门禁卡
+    "5c0a840b86f7742ffa4f2482": 2000, //THICC物品箱
+    "5b6d9ce188a4501afc1b2b25": 1000, //THICC武器箱
+  },
+
+  //单类物品交易需求数量的基础值（maxNumItems）和随机波动范围（maxRandomNumItems）
+  //默认配置为5±2，即4-10个
+  "maxNumItems": 10,
+  "maxRandomNumItems": 6,
+  "maxDifferentItems": 2, //单次交易中不同物品的最大种类（调整可能导致交易结果异常）
+
+  "valueStep": 15000, //每个层级的价值阶梯（例如层级1<15000卢布，层级2<30000卢布）
+  "maxBarterValue": 1619, //交易的最大价值（建议设为质数以降低除数干扰）
+  "maxsteps": 15, //超过此层级的物品强制降级
+
+  /***
+   *以下两项可视为模组"难度"调节参数
+   */
+  "valueExtraCost": 0, //物品的额外层级加成（在乘数后追加）
+  "valueMultiplier": 2, //物品出售价值乘数（越高，购买所需物品越多/越贵）
+
+  "randomTierdownStepStart": 5, //出售层级超过此值时，将随机降级搜索物品
+  //不会使物品"更便宜"，而是要求更多低价值物品
+
+  "randomTierdownSteps": [0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 5, 6, 7], //随机降级步数数组
+
+  "valueCutoff": 1000, //价值低于此值的物品可用常规货币购买
+  "overrideExistingBarters": true, //覆盖现有交易
+  "copyOverrideExistingBarters": true, //复制现有交易并随机化新交易
+
+  "maxValueOverHandbookMultiplier": 10, //物品价值不超过手册价格的倍数
+
+  "writeLog": false, //启用日志记录（略微延长商人刷新时间）
+  "writeLogLocale": "en", //日志语言（未找到对应语言时默认英文）
+
+  "cashTradeEnabled": true, //启用现金交易（将物物交易转为现金交易）
+  "cashTradeChance": 0.03, //现金交易概率
+  "cashTradeMinValue": 75000, //现金交易最低价值
+  "cashTradeMultiplier": 3, //现金交易价值乘数
+  "cashTradeCurrency": {
+    "5935c25fb3acc3127c3d8cd9": "5696686a4bdc2da3298b456a", //和平护卫者：美元
+    "58330581ace78e27b8b10cee": "569668774bdc2da2298b4568", //斯凯尔：欧元
+  },
+
+  "saveloadBarters": false, //从文件加载/保存交易配置（类似固定随机种子）
+
+  //可用语言列表：
+  /*
+    "ch": "Chinese",
+    "cz": "Czech",
+    "en": "English",
+    "es": "Spanish",
+    "es-mx": "Spanish (Mexico)",
+    "fr": "French",
+    "ge": "German",
+    "hu": "Hungarian",
+    "it": "Italian",
+    "jp": "Japanese",
+    "kr": "Korean",
+    "pl": "Polish",
+    "po": "Portuguese",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sk": "Slovak",
+    "tu": "Turkish"
+    */
+}
+
+
+/* Unused categories as of 3.8.x Feel free to add at your own leisure. 
+"57bef4c42459772e8d35a53b": { "multi": 1 }, //GearComponents
+"5448e54d4bdc2dcc718b4568": { "multi": 1 }, //Armor
+"5448bf274bdc2dfc2f8b456a": { "multi": 1 }, //Secured Containers
+"5671435f4bdc2d96058b4569": { "multi": 1 }, //Containers & Case
+"5795f317245977243854e041": { "multi": 1 }, //Simple Containers
+"5448e5284bdc2dcb718b4567": { "multi": 1 }, //Vest
+"5448e53e4bdc2d60728b4567": { "multi": 1 }, //Backpack
+"5448e5724bdc2ddf718b4568": { "multi": 1 }, //Visor
+"5a341c4086f77401f2541505": { "multi": 1 }, //Headwear
+"5a341c4686f77469e155819e": { "multi": 1 }, //Facecover
+"5b3f15d486f77432d0509248": { "multi": 1 }, //Armband
+"644120aa86ffbe10ee032b6f": { "multi": 1 }, //ArmorPlate
+
+"55818a304bdc2db5418b457d": { "multi": 1 }, //Receiver
+"55818a684bdc2ddd698b456d": { "multi": 1 }, //PistolGrip
+"56ea9461d2720b67698b456f": { "multi": 1 }, //Gasblock
+"55818a104bdc2db9688b4569": { "multi": 1 }, //Handguard
+"555ef6e44bdc2de9068b457e": { "multi": 1 }, //Barrel
+"55818a594bdc2db9688b456a": { "multi": 1 }, //Stock
+"55818b224bdc2dde698b456f": { "multi": 1 }, //Mounts
+"5448bc234bdc2d3c308b4569": { "multi": 1 }, //Magazines
+"55818b014bdc2ddc698b456b": { "multi": 1 }, //Launcher
+"627a137bf21bc425b06ab944": { "multi": 1 }, //Grenade Launcher Magazine
+"610720f290b75a49ff2e5e25": { "multi": 1 }, //CylinderMagazine
+"55818a6f4bdc2db9688b456b": { "multi": 1 }, //Charging Handle
+"5a74651486f7744e73386dd1": { "multi": 1 }, //AuxiliaryMod
+"55818afb4bdc2dde698b456d": { "multi": 1 }, //Bipods
+"55818af64bdc2d5b648b4570": { "multi": 1 }, //Foregrips
+"55818b084bdc2d5b648b4571": { "multi": 1 }, //Flashlights
+"5b5f73c486f77447ec5d7704": { "multi": 1 }, //Laser target pointers
+"55818b164bdc2ddc698b456c": { "multi": 1 }, //Tactical combo devices
+"550aa4bf4bdc2dd6348b456b": { "multi": 1 }, //Flashhiders & brakes
+"5b5f72f786f77447ec5d7702": { "multi": 1 }, //Muzzle adapters
+"550aa4cd4bdc2dd8348b456c": { "multi": 1 }, //Silencer
+"550aa4dd4bdc2dc9348b4569": { "multi": 1 }, //MuzzleCombo
+
+"55818add4bdc2d5b648b456f": { "multi": 1 }, //Assault scopes
+"55818ad54bdc2ddc698b4569": { "multi": 1 }, //Collimators
+"55818acf4bdc2dde698b456b": { "multi": 1 }, //Compact collimators
+"55818ac54bdc2d5b648b456e": { "multi": 1 }, //Iron sights
+"55818ae44bdc2dde698b456c": { "multi": 1 }, //Optics
+"55818aeb4bdc2ddc698b456a": { "multi": 1 }, //Special scopes
+"5a2c3a9486f774688b05e574": { "multi": 1 }, //Night vison
+
+"5447e1d04bdc2dff2f8b4567": { "multi": 1 }, //Melee Weapons
+"5447bed64bdc2d97278b4568": { "multi": 1 }, //Machine Guns
+"5447b6254bdc2dc3278b4568": { "multi": 1 }, //SnipersRifles
+"5447b5e04bdc2d62278b4567": { "multi": 1 }, //Smgs
+"5447b6094bdc2dc3278b4567": { "multi": 1 }, //Shotguns
+"5447b5cf4bdc2d65278b4567": { "multi": 1 }, //Pistol
+"617f1ef5e8b54b0998387733": { "multi": 1 }, //Revolver
+"5447b6194bdc2d67278b4567": { "multi": 1 }, //MarksmanRifles
+"5447b5f14bdc2d61278b4567": { "multi": 1 }, //AssaultRifles
+"5447b5fc4bdc2d87278b4567": { "multi": 1 }, //AssaultCarbines
+"5447bedf4bdc2d87278b4568": { "multi": 1 }, //GrenadeLauncher
+
+"543be5cb4bdc2deb348b4568": { "multi": 1 }, //Ammobox
+"5485a8684bdc2da71d8b4567": { "multi": 1 }, //Rounds
+
+
+"5c164d2286f774194c5e69fa": { "multi": 1 }, //Keycards
+"5c99f98d86f7745c314214b3": { "multi": 1 }, //MechanicalKeys
+
+"5447e0e74bdc2d3c308b4567": { "multi": 1 }, //Special Equipments
+"5f4fbaaca5573a5ac31db429": { "multi": 1 }, //Compass
+"61605ddea09d851a0a0c1bbc": { "multi": 1 }, //Portable Range Finder
+"567849dd4bdc2d150f8b456e": { "multi": 1 }, //Maps
+"543be5dd4bdc2deb348b4569": { "multi": 1 }, //Money
+"62f109593b54472778797866": { "multi": 1 }, //RandomLootContainer
+*/
