@@ -1,4 +1,5 @@
 using EFT;
+using EFT.Communications;
 using EFT.Interactive;
 using Comfort.Common;
 using System;
@@ -48,8 +49,39 @@ public static class CustomExfilService
         string exitName = exfilTarget.exitName;
 
         float delay = 0f;
-        localGame.Stop(player.ProfileId, ExitStatus.Survived, exitName, delay);
-        Logger.Info($"local game stopped for profile '{player.ProfileId}'");
+        PerformLocalGameStop(localGame, player.ProfileId, exitName, delay);
+    }
+
+    private static void PerformLocalGameStop(LocalGame localGame, string profileId, string exitName, float delay)
+    {
+        try
+        {
+            localGame.Stop(profileId, ExitStatus.Survived, exitName, delay);
+            Logger.Info($"local game stopped for profile '{profileId}'");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"localGame.Stop failed: {ex.Message}");
+            Logger.Error($"Stack trace: {ex.StackTrace}");
+            Logger.Info($"scheduling delayed retry for localGame.Stop");
+
+            var delayedActionGO = new GameObject("PTT_ExtractRetry");
+            delayedActionGO.AddComponent<DelayedAction>().Init(() =>
+            {
+                try
+                {
+                    localGame.Stop(profileId, ExitStatus.Survived, exitName, delay);
+                    Logger.Info($"local game stopped for profile '{profileId}' on retry");
+                }
+                catch (Exception retryEx)
+                {
+                    Logger.Error($"localGame.Stop retry failed: {retryEx.Message}");
+                    NotificationManagerClass.DisplayWarningNotification(
+                        "Extraction failed, please try again.",
+                        ENotificationDurationType.Long);
+                }
+            });
+        }
     }
 
     public static void TransitTo(ExfilTarget exfilTarget, Action onTransitDone)

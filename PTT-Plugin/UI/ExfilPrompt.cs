@@ -31,8 +31,9 @@ public class ExfilPrompt(ExfiltrationPoint Exfil)
         {
             if (_actionToExecuteOnConfirm != null)
             {
-                _actionToExecuteOnConfirm();
+                var action = _actionToExecuteOnConfirm;
                 _actionToExecuteOnConfirm = null;
+                action();
                 _transitVoted = true;
             }
         };

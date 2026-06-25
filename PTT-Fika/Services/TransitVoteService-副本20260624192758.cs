@@ -1,0 +1,565 @@
+using System;
+using System.Collections.Generic;
+using Comfort.Common;
+using EFT.Communications;
+using InteractableExfilsAPI.Singletons;
+using LiteNetLib;
+using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Players;
+using Fika.Core.Networking;
+using Fika.Core.Modding;
+using Fika.Core.Modding.Events;
+using Fika.Core.Coop.Utils;
+using PTT.Data;
+using PTT.Helpers;
+using PTT.Packets;
+using EFT;
+using System.Linq;
+
+namespace PTT.Fika.Services
+{
+    internal static class TransitVoteService
+    {
+        private static Dictionary<int, ExfilTarget> Votes = new Dictionary<int, ExfilTarget>();
+        private static Action ExfilAction = null;
+        private static bool Enabled = true;
+
+        public static void Init()
+        {
+            FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkManagerCreated);
+            LoggerPublic.Info("Initialized Transit Vote service");
+        }
+
+        public static void OnRaidStarted()
+        {
+            Votes = new Dictionary<int, ExfilTarget>();
+            ExfilAction = null;
+            Enabled = true;
+        }
+
+        public static void OnGameStarted()
+        {
+            RegisterPlayerHostDeadEvent();
+        }
+
+        public static void VoteForExfil(ExfilTarget exfilTarget, Action exfilAction)
+        {
+            CoopHandler coopHandler = GetCoopHandler();
+            if (coopHandler == null)
+            {
+                LoggerPublic.Error("(FIKA) Cannot vote for exfil because no CoopHandler found");
+                return;
+            }
+
+            // Check if we're the only human player
+            List<CoopPlayer> humanPlayers = GetHumanPlayers();
+            bool isSolo = humanPlayers.Count <= 1;
+
+            LoggerPublic.Info($"(FIKA) Vote for exfil {exfilTarget.GetCustomExitName()} with current player {coopHandler.MyPlayer.NetId}, human players count: {humanPlayers.Count}");
+
+            // If solo, bypass voting and perform transit immediately
+            if (isSolo)
+            {
+                LoggerPublic.Info($"(FIKA) Solo player detected, bypassing vote and performing transit immediately");
+                ExfilAction = exfilAction;
+                
+                if (IsHost())
+                {
+                    // Server performs the exfil directly
+                    PerformAllExfil();
+                }
+                else if (IsClient())
+                {
+                    // Client needs to tell server to perform exfil immediately
+                    // We'll send a special vote packet that the server will recognize as solo
+                    Votes[coopHandler.MyPlayer.NetId] = exfilTarget;
+                    var soloNullablePacket = CreateVotePacket(exfilTarget);
+                    if (soloNullablePacket == null)
+                    {
+                        LoggerPublic.Error("(FIKA) Cannot send solo vote packet: failed to resolve player NetId");
+                        return;
+                    }
+                    var soloPacket = soloNullablePacket.Value;
+                    Singleton<FikaClient>.Instance.SendData(ref soloPacket, DeliveryMethod.ReliableSequenced);
+                }
+                return;
+            }
+
+            // Multiple players - continue with normal voting logic
+            NotificationManagerClass.DisplayMessageNotification($"Voted for exfil {exfilTarget.GetCustomActionName()}", ENotificationDurationType.Long);
+
+            ExfilAction = exfilAction;
+            Votes[coopHandler.MyPlayer.NetId] = exfilTarget;
+            
+            // Skip UI refresh on dedicated servers
+            if (!IsDedicated())
+            {
+                InteractableExfilsService.RefreshPrompt();
+            }
+
+            if (IsHost() && IsVoteSuccess())
+            {
+                PerformAllExfil();
+                return;
+            }
+
+            var nullablePacket = CreateVotePacket(exfilTarget);
+            if (nullablePacket == null)
+            {
+                LoggerPublic.Error("(FIKA) Cannot send vote packet: failed to resolve player NetId");
+                return;
+            }
+            var packet = nullablePacket.Value;
+            if (IsClient())
+            {
+                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableSequenced);
+            }
+            else if (IsHost())
+            {
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableSequenced);
+            }
+        }
+
+        public static void CancelVoteForExfil(string cancelMessage)
+        {
+            CoopHandler coopHandler = GetCoopHandler();
+            if (coopHandler == null)
+            {
+                LoggerPublic.Error("(FIKA) Cannot cancel vote for exfil because no CoopHandler found");
+                return;
+            }
+
+            if (ExfilAction == null && !Votes.ContainsKey(coopHandler.MyPlayer.NetId))
+            {
+                LoggerPublic.Warning($"(FIKA) No vote to cancel with current player {coopHandler.MyPlayer.NetId}");
+                return;
+            }
+
+            LoggerPublic.Info($"(FIKA) Cancel vote with current player {coopHandler.MyPlayer.NetId}");
+
+            if (!string.IsNullOrEmpty(cancelMessage))
+            {
+                NotificationManagerClass.DisplayMessageNotification(cancelMessage, ENotificationDurationType.Long);
+            }
+
+            ExfilAction = null;
+            Votes.Remove(coopHandler.MyPlayer.NetId);
+            
+            // Skip UI refresh on dedicated servers
+            if (!IsDedicated())
+            {
+                InteractableExfilsService.RefreshPrompt();
+            }
+
+            PlayerVotedForExfilTargetPacket? nullablePacket = CreateCancelVotePacket();
+            if (nullablePacket == null)
+            {
+                LoggerPublic.Error("(FIKA) Cannot send cancel vote packet: failed to resolve player NetId");
+                return;
+            }
+            PlayerVotedForExfilTargetPacket packet = nullablePacket.Value;
+            if (IsClient())
+            {
+                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableSequenced);
+            }
+            else if (IsHost())
+            {
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableSequenced);
+            }
+        }
+
+        public static bool IsTransitDisabled(ExfilTarget exfilTarget)
+        {
+            if (!Enabled)
+            {
+                return true;
+            }
+
+            if (Votes.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (ExfilTarget votedExfilTarget in Votes.Values)
+            {
+                if (votedExfilTarget.GetCustomExitName() != exfilTarget.GetCustomExitName())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static void SendDisableTransitVotePacket(string reason)
+        {
+            if (!Singleton<FikaServer>.Instantiated)
+            {
+                LoggerPublic.Error("(FIKA) Only the server can call SendDisableTransitVotePacket");
+                return;
+            }
+
+            var fikaServer = Singleton<FikaServer>.Instance;
+            var packet = new DisableTransitVotePacket { Reason = reason };
+            fikaServer.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
+        private static void HandlePlayerVotedForExfil(PlayerVotedForExfilTargetPacket packet, NetPeer peer)
+        {
+            CoopHandler coopHandler = GetCoopHandler();
+            if (coopHandler == null)
+            {
+                LoggerPublic.Error("(FIKA) HandlePlayerVotedForExfil: cannot retrieve coopHandler");
+                return;
+            }
+
+            int playerNetId = packet.NetId;
+
+            // Check if this is a solo player situation
+            List<CoopPlayer> humanPlayers = GetHumanPlayers();
+            bool isSolo = humanPlayers.Count <= 1;
+            
+            LoggerPublic.Info($"(FIKA) HandlePlayerVotedForExfil: Found {humanPlayers.Count} human players, isSolo={isSolo}");
+
+            if (packet.IsVoteCancelled())
+            {
+                LoggerPublic.Info($"(FIKA) Cancel vote packet received by peer {playerNetId}");
+                if (!isSolo && !IsDedicated())
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"Vote cancelled for player {playerNetId}", ENotificationDurationType.Long);
+                }
+                Votes.Remove(playerNetId);
+                
+                // Skip UI refresh on dedicated servers
+                if (!IsDedicated())
+                {
+                    InteractableExfilsService.RefreshPrompt();
+                }
+
+                if (IsHost())
+                {
+                    // propagate change (for UI)
+                    Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableSequenced, peer);
+                }
+            }
+            else
+            {
+                ExfilTarget exfilTarget = FromVotePacket(packet);
+
+                LoggerPublic.Info($"(FIKA) Vote packet received by peer {playerNetId} for exfil {exfilTarget.GetCustomExitName()}");
+                
+                // If solo player, perform exfil immediately
+                if (isSolo && IsHost())
+                {
+                    LoggerPublic.Info($"(FIKA) Solo player vote received on server, performing exfil immediately");
+                    Votes[playerNetId] = exfilTarget;
+                    PerformAllExfil();
+                    return;
+                }
+                
+                // Multiple players - show notification and continue with voting
+                if (!isSolo && !IsDedicated())
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"Player {playerNetId} voted for exfil {exfilTarget.GetCustomActionName()}", ENotificationDurationType.Long);
+                }
+                Votes[playerNetId] = exfilTarget;
+                
+                // Skip UI refresh on dedicated servers
+                if (!IsDedicated())
+                {
+                    InteractableExfilsService.RefreshPrompt();
+                }
+
+                if (IsHost())
+                {
+                    // propagate change (for UI)
+                    Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableSequenced, peer);
+                }
+            }
+
+            if (IsHost() && IsVoteSuccess())
+            {
+                PerformAllExfil();
+            }
+        }
+
+        private static void OnFikaNetworkManagerCreated(FikaNetworkManagerCreatedEvent createdEvent)
+        {
+            IFikaNetworkManager networkManager = createdEvent.Manager;
+            if (networkManager == null)
+            {
+                LoggerPublic.Error("(FIKA) Cannot register packets because networkManager is not found");
+                return;
+            }
+
+            NetworkManagerStore.FikaNetworkManager = networkManager;
+
+            networkManager.RegisterPacket<PlayerVotedForExfilTargetPacket, NetPeer>(HandlePlayerVotedForExfil);
+            LoggerPublic.Info("(FIKA) Registered PlayerVotedForExfilTargetPacket");
+
+            if (IsClient())
+            {
+                networkManager.RegisterPacket<PerformExfilPacket, NetPeer>(HandlePerformExfil);
+                LoggerPublic.Info("(FIKA) Registered PerformExfilPacket");
+                networkManager.RegisterPacket<DisableTransitVotePacket, NetPeer>(HandleDisableTransitVote);
+                LoggerPublic.Info("(FIKA) Registered DisableTransitVotePacket");
+            }
+        }
+
+        public static void RegisterPlayerHostDeadEvent()
+        {
+            if (!IsHostPlayer())
+            {
+                LoggerPublic.Info("player death event not registered because no player host detected");
+                return;
+            }
+
+            CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+
+            if (coopPlayer == null)
+            {
+                LoggerPublic.Error("coopPlayer not found when trying to register OnPlayerDead event");
+                return;
+            }
+
+            // avoid multiple registration
+            coopPlayer.OnPlayerDead -= OnHostPlayerDead;
+            coopPlayer.OnPlayerDead += OnHostPlayerDead;
+
+            LoggerPublic.Info("Registered OnPlayerDead event");
+        }
+
+        private static void OnHostPlayerDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
+        {
+            CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            if (coopPlayer == null)
+            {
+                LoggerPublic.Error("coopPlayer not found on player death");
+                return;
+            }
+
+            if (coopPlayer.ProfileId != player.ProfileId)
+            {
+                return;
+            }
+
+            string message = "Player host is dead";
+            Enabled = false;
+            CancelVoteForExfil(null);
+            SendDisableTransitVotePacket(message);
+            LoggerPublic.Info(message);
+        }
+
+        private static void PerformAllExfil()
+        {
+            if (!Singleton<FikaServer>.Instantiated)
+            {
+                LoggerPublic.Error("(FIKA) Only the server can call PerformAllExfil");
+                return;
+            }
+
+            var fikaServer = Singleton<FikaServer>.Instance;
+            var packet = new PerformExfilPacket();
+            fikaServer.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            PerformLocalExfil();
+        }
+
+        private static void HandlePerformExfil(PerformExfilPacket packet, NetPeer peer)
+        {
+            PerformLocalExfil();
+        }
+
+        private static void HandleDisableTransitVote(DisableTransitVotePacket packet, NetPeer peer)
+        {
+            Enabled = false;
+            
+            // Skip UI operations on dedicated servers
+            if (!IsDedicated())
+            {
+                NotificationManagerClass.DisplayMessageNotification($"Transits disabled because {packet.Reason}", ENotificationDurationType.Long);
+                InteractableExfilsService.RefreshPrompt();
+            }
+        }
+
+        private static ExfilTarget RetrieveFirstVote()
+        {
+            foreach (var kvp in Votes)
+            {
+                return kvp.Value;
+            }
+
+            return null;
+        }
+
+        private static void PerformLocalExfil()
+        {
+            if (IsDedicated())
+            {
+                ExfilTarget exfilTarget = RetrieveFirstVote();
+                if (exfilTarget == null)
+                {
+                    LoggerPublic.Error("(FIKA dedi) Cannot perform exfil because no exil found in Votes dictionary");
+                }
+                else
+                {
+                    CustomExfilService.TransitTo(exfilTarget);
+                }
+            }
+            else
+            {
+                if (ExfilAction == null)
+                {
+                    LoggerPublic.Error("(FIKA) Cannot perform exfil because no action has been set");
+                    return;
+                }
+
+                ExfilAction();
+                ExfilAction = null;
+            }
+        }
+
+        private static bool IsVoteSuccess()
+        {
+            ExfilTarget votedExfilTarget = null;
+            List<CoopPlayer> humans = GetHumanPlayers();
+
+            LoggerPublic.Info($"(FIKA) IsVoteSuccess: Checking votes for {humans?.Count ?? 0} human players");
+            LoggerPublic.Info($"(FIKA) IsVoteSuccess: Current votes count: {Votes.Count}");
+
+            if (humans == null || humans.Count == 0)
+            {
+                LoggerPublic.Error("(FIKA) No human players found");
+                return false;
+            }
+
+            // Remove stale votes from players no longer in the session
+            HashSet<int> activeNetIds = new(humans.Select(h => h.NetId));
+            List<int> staleKeys = Votes.Keys.Where(k => !activeNetIds.Contains(k)).ToList();
+            foreach (int staleKey in staleKeys)
+            {
+                LoggerPublic.Info($"(FIKA) Removing stale vote from disconnected/left player NetId={staleKey}");
+                Votes.Remove(staleKey);
+            }
+
+            // If solo player and they have voted, it's automatically a success
+            if (humans.Count == 1 && Votes.Count > 0)
+            {
+                LoggerPublic.Info($"(FIKA) Solo player vote detected, automatic success");
+                return true;
+            }
+
+            foreach (CoopPlayer human in humans)
+            {
+                LoggerPublic.Info($"(FIKA) Checking vote for player NetId={human.NetId}, ProfileId={human.Profile?.ProfileId}");
+                
+                if (!Votes.TryGetValue(human.NetId, out ExfilTarget exfilTarget))
+                {
+                    LoggerPublic.Info($"(FIKA) Player NetId={human.NetId} has not voted yet");
+                    return false;
+                }
+
+                LoggerPublic.Info($"(FIKA) Player NetId={human.NetId} voted for {exfilTarget.GetCustomExitName()}");
+
+                if (votedExfilTarget == null)
+                {
+                    votedExfilTarget = exfilTarget;
+                }
+                else if (exfilTarget.GetCustomExitName() != votedExfilTarget.GetCustomExitName())
+                {
+                    LoggerPublic.Info($"(FIKA) Vote mismatch: {exfilTarget.GetCustomExitName()} != {votedExfilTarget.GetCustomExitName()}");
+                    return false;
+                }
+            }
+
+            LoggerPublic.Info($"(FIKA) Vote success: All players voted for {votedExfilTarget?.GetCustomExitName() ?? "null"}");
+            return votedExfilTarget != null;
+        }
+
+        private static ExfilTarget FromVotePacket(PlayerVotedForExfilTargetPacket packet)
+        {
+            RawExfilTarget rawExfilTarget = packet.RawExfilTarget;
+
+            return new ExfilTarget
+            {
+                exitName = rawExfilTarget.ExitName,
+                isTransit = rawExfilTarget.IsTransit,
+                transitMapId = rawExfilTarget.TransitMapId,
+                transitSpawnPointId = rawExfilTarget.TransitSpawnPointId,
+                offraidPosition = rawExfilTarget.OffraidPosition,
+            };
+        }
+
+        private static PlayerVotedForExfilTargetPacket? CreateCancelVotePacket()
+        {
+            int? netId = GetMyPlayerNetId();
+            if (netId == null) return null;
+            return new PlayerVotedForExfilTargetPacket
+            {
+                NetId = netId.Value,
+                RawExfilTarget = new RawExfilTarget()
+            };
+        }
+
+        private static PlayerVotedForExfilTargetPacket? CreateVotePacket(ExfilTarget exfilTarget)
+        {
+            int? netId = GetMyPlayerNetId();
+            if (netId == null) return null;
+            return new PlayerVotedForExfilTargetPacket
+            {
+                NetId = netId.Value,
+                RawExfilTarget = new RawExfilTarget
+                {
+                    ExitName = exfilTarget.exitName,
+                    IsTransit = exfilTarget.isTransit,
+                    TransitMapId = exfilTarget.transitMapId,
+                    TransitSpawnPointId = exfilTarget.transitSpawnPointId,
+                    OffraidPosition = exfilTarget.offraidPosition,
+                }
+            };
+        }
+
+        // Helper methods that use Main's methods
+        private static bool IsHost() => Singleton<FikaServer>.Instantiated;
+        private static bool IsClient() => Singleton<FikaClient>.Instantiated;
+        private static bool IsDedicated()
+        {
+            var groupId = FikaBackendUtils.Profile?.Info?.GroupId;
+            return FikaBackendUtils.IsServer && (groupId == "DEDICATED" || groupId == "HEADLESS");
+        }
+        private static bool IsHostPlayer() => IsHost() && !IsDedicated();
+        
+        private static int? GetMyPlayerNetId()
+        {
+            var coopHandler = GetCoopHandler();
+            if (coopHandler?.MyPlayer == null)
+            {
+                LoggerPublic.Error("(FIKA) GetPlayerNetId: no CoopHandler.MyPlayer");
+                return null;
+            }
+            return coopHandler.MyPlayer.NetId;
+        }
+
+        private static List<CoopPlayer> GetHumanPlayers()
+        {
+            var players = PTT.Services.FikaBridge.GetHumanPlayers();
+            return players.Cast<CoopPlayer>().ToList();
+        }
+
+        private static CoopHandler GetCoopHandler()
+        {
+            var networkManager = GetNetworkManager();
+            return networkManager?.CoopHandler;
+        }
+
+        private static IFikaNetworkManager GetNetworkManager()
+        {
+            if (NetworkManagerStore.FikaNetworkManager != null)
+            {
+                return NetworkManagerStore.FikaNetworkManager;
+            }
+
+            LoggerPublic.Warning("FikaNetworkManager not set, trying to fallback on singleton");
+            return Singleton<IFikaNetworkManager>.Instance;
+        }
+    }
+}

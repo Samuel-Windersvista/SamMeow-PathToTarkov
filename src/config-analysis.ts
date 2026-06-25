@@ -2,10 +2,8 @@ import { isValidExfilForMap } from './all-exfils';
 import type { ByLocale, ByMap } from './config';
 import {
   EMPTY_STASH,
-  ROAMING_EMERGENCY_STASH,
   isLocaleAvailable,
   type Config,
-  type Infiltrations,
   type MapName,
   type SpawnConfig,
 } from './config';
@@ -145,10 +143,7 @@ const getErrorsForOffraidPositions = (config: Config, spawnConfig: SpawnConfig):
           );
         }
 
-        if (
-          !offraidPosition &&
-          (!parsed.transitTargetMapName || !parsed.transitTargetSpawnPointId)
-        ) {
+        if (!offraidPosition && (!parsed.transitTargetMapName || !parsed.transitTargetMapName)) {
           errors.push(`cannot parse exfil target in exfiltrations.${mapName}.${extractName}`);
         }
 
@@ -318,10 +313,7 @@ const getErrorsSecondaryStashes = (config: Config): string[] => {
   const names: Set<string> = new Set();
 
   config.hideout_secondary_stashes.forEach(stashConfig => {
-    if (
-      stashConfig.name === EMPTY_STASH.name ||
-      stashConfig.name === ROAMING_EMERGENCY_STASH.name
-    ) {
+    if (stashConfig.name === EMPTY_STASH.name) {
       errors.push(
         `secondary stash "${stashConfig.name}" is a special reserved name, please choose another.`,
       );
@@ -602,46 +594,4 @@ export const analyzeConfig = (config: Config, spawnConfig: SpawnConfig): ConfigV
     errors,
     warnings,
   };
-};
-
-/**
- * 反向查找原版转移的目标 offraid 位置。
- *
- * 三层查找：
- * 1. 反向查 infiltrations：找到所有能潜入 destinationMap 的 offraid 位置，唯一匹配直接返回
- * 2. 查 defaults 映射：消歧义或兜底
- * 3. 返回 null：保持当前 offraid 位置不变
- *
- * @param destinationMap - 原版转移的目标地图名（如 "woods"）
- * @param infiltrations - PTT 的 infiltrations 配置
- * @param defaults - 可选的消歧义映射表 { mapName: offraidPosition }
- * @returns 匹配的 offraid 位置名，无法确定时返回 null
- */
-export const getVanillaTransitDestination = (
-  destinationMap: string,
-  infiltrations: Infiltrations,
-  defaults?: Record<string, string>,
-): string | null => {
-  // 第1层：反向查 infiltrations
-  const candidates: string[] = [];
-
-  for (const [offraidPosition, byMap] of Object.entries(infiltrations)) {
-    const spawns = byMap[destinationMap as MapName];
-    if (spawns && spawns.length > 0) {
-      candidates.push(offraidPosition);
-    }
-  }
-
-  // 唯一候选 → 直接使用
-  if (candidates.length === 1) {
-    return candidates[0];
-  }
-
-  // 第2层：查配置映射（覆盖歧义和无候选两种情况）
-  if (defaults?.[destinationMap]) {
-    return defaults[destinationMap];
-  }
-
-  // 第3层：放弃
-  return null;
 };

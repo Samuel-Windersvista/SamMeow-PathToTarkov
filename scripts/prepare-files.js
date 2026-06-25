@@ -4,8 +4,6 @@ const { execSync } = require('child_process');
 const packageJson = require('../package.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { mkdirp } = require('mkdirp');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs');
 // // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const cpr = require('cpr');
 
@@ -24,14 +22,7 @@ const main = async modName => {
     () => mkdirp.sync('./dist/BepInEx/plugins/PathToTarkov'),
     `cpr ./PTT-Plugin/bin/Debug/net471/${PTT_DLL_FILENAME} ./dist/BepInEx/plugins/${PTT_DLL_FILENAME} -o`,
     `cpr ./PTT-Packets/bin/Debug/net471/${PTT_PACKETS_DLL_FILENAME} ./dist/BepInEx/plugins/${PTT_PACKETS_DLL_FILENAME} -o`,
-    () => {
-      const fikaDll = `./PTT-Fika/bin/Debug/net472/${PTT_FIKA_DLL_FILENAME}`;
-      if (fs.existsSync(fikaDll)) {
-        execSync(`cpr ${fikaDll} ./dist/BepInEx/plugins/PathToTarkov/${PTT_FIKA_DLL_FILENAME} -o`);
-      } else {
-        console.warn('> Warning: PTT-Fika.dll not found, skipping (Fika not installed)');
-      }
-    },
+    `cpr ./PTT-Fika/bin/Debug/net472/${PTT_FIKA_DLL_FILENAME} ./dist/BepInEx/plugins/PathToTarkov/${PTT_FIKA_DLL_FILENAME} -o`,
     `cpr package.json ${serverModDir}/package.json -o`,
     `cpr dist/src ${serverModDir}/src -o`,
     `cpr configs ${serverModDir}/configs -o`,

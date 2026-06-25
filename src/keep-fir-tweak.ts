@@ -14,6 +14,7 @@ export class KeepFoundInRaidTweak {
     );
 
     const nbImpactedItems = KeepFoundInRaidTweak.setSpawnedInSessionOnItems(allEquipmentItems);
+    this.saveServer.saveProfile(sessionId);
 
     return nbImpactedItems;
   }

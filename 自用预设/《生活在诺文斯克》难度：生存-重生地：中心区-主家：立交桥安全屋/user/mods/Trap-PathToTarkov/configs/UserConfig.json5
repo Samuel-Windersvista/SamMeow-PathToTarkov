@@ -1,4 +1,4 @@
-{
+ {
   selectedConfig: 'Realization of Norvinsk',
   gameplay: {
     multistash: true,
@@ -11,7 +11,12 @@
     // - 'location_based': Only available at configured locations [ragfair]
     // - 'disabled': Completely disabled
     fleaMarketMode: 'location_based',
-    fleaMarketMinLevel: 1, // Minimum level required to access flea market
+    fleaMarketMinLevel: 5, // Minimum level required to access flea market
+    // Car extract settings:
+    carExtractCostEnabled: true, // Enable/disable car extract costs
+    carExtractBasePrice: 15000, // Base price in roubles for car extracts
   },
+  // Debug settings:
+  debug: false, // Enable/disable debug logging
   runUninstallProcedure: false,
 }

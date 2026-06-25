@@ -1,11 +1,5 @@
 import type { IBodyHealth, IGlobals } from '@spt/models/eft/common/IGlobals';
-import type {
-  IExit,
-  ILocationBase,
-  ISpawnPointParam,
-  ITransit,
-} from '@spt/models/eft/common/ILocationBase';
-import type { ILocation } from '@spt/models/eft/common/ILocation';
+import type { IExit, ILocationBase, ISpawnPointParam } from '@spt/models/eft/common/ILocationBase';
 import type { ILogger } from '@spt/models/spt/utils/ILogger';
 import type { ConfigServer } from '@spt/servers/ConfigServer';
 import type { DatabaseServer } from '@spt/servers/DatabaseServer';
@@ -57,7 +51,6 @@ import { TradersAvailabilityService } from './services/TradersAvailabilityServic
 import { fixRepeatableQuestsForPmc } from './fix-repeatable-quests';
 import { KeepFoundInRaidTweak } from './keep-fir-tweak';
 import { ExfilsTooltipsTemplater } from './services/ExfilsTooltipsTemplater';
-import { getVanillaTransitDestination } from './config-analysis';
 import type { RaidCache } from './event-watcher';
 import type { AllLocalesInDb } from './services/LocaleResolver';
 
@@ -109,13 +102,6 @@ export class PathToTarkovController {
         return existingConfig;
       }
 
-      // Clean up old entries if cache grows too large
-      const cacheKeys = Object.keys(this.configCache);
-      if (cacheKeys.length > 100) {
-        const keysToRemove = cacheKeys.slice(0, cacheKeys.length - 50);
-        keysToRemove.forEach(key => delete this.configCache[key]);
-      }
-
       // TODO: instead of persisting the config directly, persist the performed action and replay them in order to rebuild the config
       const newConfig = deepClone(this.baseConfig);
       this.configCache[sessionId] = newConfig;
@@ -123,6 +109,7 @@ export class PathToTarkovController {
       return newConfig;
     };
 
+    this.tradersAvailabilityService = new TradersAvailabilityService();
     this.stashController = new StashController(
       this.getConfig,
       userConfig,
@@ -266,15 +253,15 @@ export class PathToTarkovController {
   syncLocationBase(locationBase: ILocationBase, sessionId: string): void {
     const raidCache = this.getRaidCache(sessionId);
 
-    this.debug(` syncLocationBase called for sessionId: ${sessionId}`);
+    this.logger.info(`[PTT Debug] syncLocationBase called for sessionId: ${sessionId}`);
     this.logger.info(
-      `RaidCache exists: ${!!raidCache}, exitStatus: ${raidCache?.exitStatus}, transitTargetMapName: ${raidCache?.transitTargetMapName}, transitTargetSpawnPointId: ${raidCache?.transitTargetSpawnPointId}`,
+      `[PTT Debug] RaidCache exists: ${!!raidCache}, exitStatus: ${raidCache?.exitStatus}, transitTargetMapName: ${raidCache?.transitTargetMapName}, transitTargetSpawnPointId: ${raidCache?.transitTargetSpawnPointId}`,
     );
 
     // Check if this might be a headless client with missing raid cache
     if (!raidCache) {
       this.logger.warning(
-        `No raid cache found for session ${sessionId}, this might be a headless client`,
+        `[PTT Debug] No raid cache found for session ${sessionId}, this might be a headless client`,
       );
       // For headless clients, we should still update spawn points based on offraid position
       this.updateSpawnPoints(locationBase, sessionId);
@@ -285,42 +272,14 @@ export class PathToTarkovController {
 
     if (raidCache && raidCache.exitStatus === 'Transit') {
       // handle when a player took a vanilla transit
-      this.debug(` Handling vanilla transit`);
+      this.logger.info(`[PTT Debug] Handling vanilla transit`);
       this.updateInfiltrationForPlayerSpawnPoints(locationBase);
-
-      // 追踪原版转移目标位置（仅对真正的目标地图生效，非 PTT transit）
-      if (!raidCache.transitTargetMapName && !raidCache.transitTargetSpawnPointId) {
-        const destinationMap = resolveMapNameFromLocation(locationBase.Id);
-        const sourceMapName = raidCache.currentLocationName
-          ? resolveMapNameFromLocation(raidCache.currentLocationName)
-          : null;
-
-        if (sourceMapName && this.isTransitDestination(sourceMapName, destinationMap)) {
-          const config = this.getConfig(sessionId);
-          const destination = getVanillaTransitDestination(
-            destinationMap,
-            config.infiltrations,
-            config.vanilla_transit_destination,
-          );
-
-          if (destination) {
-            this.debug(
-              ` Vanilla transit (${sourceMapName}→${destinationMap}) → updating offraid position to ${destination}`,
-            );
-            this.updateOffraidPosition(sessionId, destination);
-          } else {
-            this.debug(
-              ` Vanilla transit (${sourceMapName}→${destinationMap}) → could not determine offraid position for ${destinationMap}`,
-            );
-          }
-        }
-      }
     }
 
     if (raidCache && raidCache.transitTargetMapName && raidCache.transitTargetSpawnPointId) {
       // handle when a player took a ptt transit
       this.logger.info(
-        `Handling PTT transit to ${raidCache.transitTargetMapName} at spawn ${raidCache.transitTargetSpawnPointId}`,
+        `[PTT Debug] Handling PTT transit to ${raidCache.transitTargetMapName} at spawn ${raidCache.transitTargetSpawnPointId}`,
       );
       this.updateSpawnPointsForTransit(
         locationBase,
@@ -330,7 +289,7 @@ export class PathToTarkovController {
       );
     } else {
       // handle when a player took a ptt extract
-      this.debug(` Handling PTT extract or initial spawn`);
+      this.logger.info(`[PTT Debug] Handling PTT extract or initial spawn`);
       this.updateSpawnPoints(locationBase, sessionId);
     }
 
@@ -510,16 +469,6 @@ export class PathToTarkovController {
       this.logger.info(`=> PathToTarkov: player offraid position changed to '${offraidPosition}'`);
     }
 
-    const nbCleared = this.stashController.clearRoamingEmergencyStashOnExit(
-      offraidPosition,
-      sessionId,
-    );
-    if (nbCleared > 0) {
-      this.logger.warning(
-        `=> PathToTarkov: cleared ${nbCleared} item${nbCleared > 1 ? 's' : ''} from roaming emergency stash`,
-      );
-    }
-
     this.stashController.updateStash(offraidPosition, sessionId);
 
     const config = this.getConfig(sessionId);
@@ -587,26 +536,13 @@ export class PathToTarkovController {
       VANILLA_STASH_IDS.forEach(stashId => {
         const item = items[stashId];
 
-        if (!item) {
-          this.logger.warning(
-            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' template not found in items, skipping`,
-          );
-          return;
-        }
-        const grid = item._props?.Grids?.[0];
-        if (!grid) {
-          this.logger.warning(
-            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' has no Grids, skipping`,
-          );
-          return;
-        }
-        const gridProps = grid._props;
+        const grid = item?._props?.Grids?.[0];
+        const gridProps = grid?._props;
+
         if (gridProps) {
           gridProps.cellsV = size;
         } else {
-          this.logger.warning(
-            `Path To Tarkov: VANILLA_STASH_ID '${stashId}' grid has no _props, skipping`,
-          );
+          throw new Error('Path To Tarkov: cannot set size for custom stash');
         }
       });
 
@@ -947,7 +883,7 @@ export class PathToTarkovController {
     const offraidPosition = this.getOffraidPosition(sessionId);
 
     this.logger.info(
-      `updateSpawnPoints - map: ${mapName}, sessionId: ${sessionId}, offraidPosition: ${offraidPosition}`,
+      `[PTT Debug] updateSpawnPoints - map: ${mapName}, sessionId: ${sessionId}, offraidPosition: ${offraidPosition}`,
     );
 
     if (!infiltrations[offraidPosition]) {
@@ -960,13 +896,13 @@ export class PathToTarkovController {
     const spawnpoints = infiltrations[offraidPosition][mapName as MapName];
 
     this.logger.info(
-      `Configured spawn points for ${mapName} at ${offraidPosition}: ${spawnpoints ? spawnpoints.join(', ') : 'none'}`,
+      `[PTT Debug] Configured spawn points for ${mapName} at ${offraidPosition}: ${spawnpoints ? spawnpoints.join(', ') : 'none'}`,
     );
 
     if (spawnpoints && spawnpoints.length > 0) {
       if (spawnpoints[0] === '*') {
         // don't update the spawnpoints if wildcard is used
-        this.debug(` Using wildcard spawn points for ${mapName}`);
+        this.logger.info(`[PTT Debug] Using wildcard spawn points for ${mapName}`);
         return;
       }
 
@@ -1079,27 +1015,6 @@ export class PathToTarkovController {
     });
   }
 
-  /**
-   * 验证当前处理的 map 是否为原版转移的真实目标地图。
-   * 通过查找源地图的 transits 数组，比对 transit.location 与当前 locationBase.Id。
-   */
-  private isTransitDestination(sourceMapName: string, destinationMap: string): boolean {
-    if (!sourceMapName || sourceMapName === destinationMap) return false;
-
-    const locations = this.db.getTables()?.locations;
-    if (!locations) return false;
-
-    // ILocations 同时包含位置字段（ILocation）和 meta 字段（ILocationsBase）
-    // 需要排除非位置字段
-    const sourceLocation = (locations as Record<string, ILocation | undefined>)[sourceMapName];
-    if (!sourceLocation?.base?.transits) return false;
-
-    return sourceLocation.base.transits.some((transit: ITransit) => {
-      const transitTarget = resolveMapNameFromLocation(transit.location);
-      return transitTarget === destinationMap;
-    });
-  }
-
   private updateLocationBaseExits(locationBase: ILocationBase, sessionId: string): void {
     if (!this.isLocationBaseAvailable(locationBase)) {
       return;
@@ -1152,7 +1067,7 @@ export class PathToTarkovController {
     const profile: Profile = this.saveServer.getProfile(sessionId);
 
     this.logger.info(
-      `getOffraidPosition - sessionId: ${sessionId}, profileId: ${profile?.info?.id}, username: ${profile?.info?.username}, defaultOffraidPosition: ${defaultOffraidPosition}`,
+      `[PTT Debug] getOffraidPosition - sessionId: ${sessionId}, profileId: ${profile?.info?.id}, username: ${profile?.info?.username}, defaultOffraidPosition: ${defaultOffraidPosition}`,
     );
 
     // Check if this is a headless client
@@ -1161,7 +1076,7 @@ export class PathToTarkovController {
 
     if (isHeadless) {
       // For headless clients, try to find the main profile's offraid position
-      this.debug(` Detected headless client: ${profileName}`);
+      this.logger.info(`[PTT Debug] Detected headless client: ${profileName}`);
 
       // Get all profiles and find the non-headless one
       const profiles = this.saveServer.getProfiles();
@@ -1172,16 +1087,20 @@ export class PathToTarkovController {
           !otherProfileName.toLowerCase().includes('headless') &&
           otherPttProfile?.PathToTarkov?.offraidPosition
         ) {
-          this.debug(
-            ` Found main profile: ${otherProfileName} with offraid position: ${otherPttProfile.PathToTarkov.offraidPosition}`,
+          this.logger.info(
+            `[PTT Debug] Found main profile: ${otherProfileName} with offraid position: ${otherPttProfile.PathToTarkov.offraidPosition}`,
           );
-          // Return the main profile's offraid position without mutating the headless profile
+          // Use the main profile's offraid position for the headless client
+          if (!profile.PathToTarkov) {
+            profile.PathToTarkov = {};
+          }
+          profile.PathToTarkov.offraidPosition = otherPttProfile.PathToTarkov.offraidPosition;
+          this.logger.info(
+            `[PTT Debug] Synced headless client offraid position to: ${otherPttProfile.PathToTarkov.offraidPosition}`,
+          );
           return otherPttProfile.PathToTarkov.offraidPosition;
         }
       }
-      this.logger.warning(
-        ` No main profile found for headless client ${profileName}, using default`,
-      );
     }
 
     if (!profile.PathToTarkov) {
@@ -1194,7 +1113,7 @@ export class PathToTarkovController {
 
     const offraidPosition = profile.PathToTarkov.offraidPosition;
 
-    this.debug(` Current offraidPosition: ${offraidPosition}`);
+    this.logger.info(`[PTT Debug] Current offraidPosition: ${offraidPosition}`);
 
     if (!this.getConfig(sessionId).infiltrations[offraidPosition]) {
       this.debug(

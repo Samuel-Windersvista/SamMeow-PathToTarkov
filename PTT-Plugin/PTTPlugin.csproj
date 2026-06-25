@@ -4,7 +4,7 @@
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>Trap.PathToTarkov</AssemblyName>
     <Description>The Tarkov open-world experience</Description>
-    <Version>6.2.0</Version>
+    <Version>6.0.0</Version>
     <LangVersion>latest</LangVersion>
     <PathToSPT>..\..</PathToSPT>
   </PropertyGroup>
@@ -59,7 +59,7 @@
       <HintPath>$(PathToSPT)\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     
-    <Reference Include="InteractableExfilsAPI" Condition="'$(NoIEAPI)' != 'true'">
+    <Reference Include="InteractableExfilsAPI">
       <HintPath>$(PathToSPT)\BepInEx\plugins\InteractableExfilsAPI\InteractableExfilsAPI.dll</HintPath>
     </Reference>
     
@@ -77,12 +77,6 @@
       <Project>{E4B8C5DB-7D40-49B5-9A4A-F4C1D3D7ADCB}</Project>
       <Name>PTT-Packets</Name>
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NoIEAPI)' == 'true'">
-    <Compile Remove="Services\ExfilPromptService.cs" />
-    <Compile Remove="Services\IEApiWrapper.cs" />
-    <Compile Remove="UI\ExfilPrompt.cs" />
   </ItemGroup>
 
   <!-- <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

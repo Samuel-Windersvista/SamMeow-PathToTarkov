@@ -10,32 +10,18 @@ public class CurrentLocationDataService
 {
     private CurrentLocationDataResponse CurrentLocationData { get; set; } = new CurrentLocationDataResponse();
     private bool _isInitialized = false;
-    private bool _fetchSucceeded = false;
 
-    public bool Init()
+    public void Init()
     {
         if (_isInitialized)
         {
             Logger.Info("CurrentLocationDataService already initialized, skipping");
-            return _fetchSucceeded;
+            return;
         }
-        _fetchSucceeded = FetchExfilsTargetsForCurrentLocation();
+        FetchExfilsTargetsForCurrentLocation();
         _isInitialized = true;
 
-        if (_fetchSucceeded)
-        {
-            PTT.Patches.InitAllExfiltrationPointsPatch.TryApplyExfilFiltering();
-        }
-        else
-        {
-            Logger.Warning("CurrentLocationDataService init failed — vanilla exfils preserved as fallback");
-        }
-        return _fetchSucceeded;
-    }
-
-    public bool DidFetchSucceed()
-    {
-        return _fetchSucceeded;
+        PTT.Patches.InitAllExfiltrationPointsPatch.TryApplyExfilFiltering();
     }
 
     public bool IsInitialized()
@@ -79,39 +65,31 @@ public class CurrentLocationDataService
         return exfilTargets;
     }
 
-    private bool FetchExfilsTargetsForCurrentLocation()
+    private void FetchExfilsTargetsForCurrentLocation()
     {
         string locationId = LocalRaidSettingsRetriever.RaidSettings.location;
 
         if (locationId == null || locationId == "")
         {
             Logger.Error($"Fatal Error: no LocationId found in GameWorld");
-            return false;
+            return;
         }
 
         try
         {
             Logger.Info($"calling FetchExfilsTargets for locationId {locationId}");
             CurrentLocationData = HttpRequest.FetchCurrentLocationData(locationId);
-            if (CurrentLocationData?.exfilsTargets == null || CurrentLocationData.exfilsTargets.Count == 0)
-            {
-                Logger.Warning($"FetchExfilsTargets returned empty data for {locationId}");
-                return false;
-            }
             Logger.Info($"FetchExfilsTargets successfully called");
-            return true;
         }
         catch (Exception ex)
         {
             Logger.Error($"Error occurred during request: {ex.Message}");
-            return false;
         }
     }
 
     public void Reset()
     {
         _isInitialized = false;
-        _fetchSucceeded = false;
         CurrentLocationData = new CurrentLocationDataResponse();
     }
 }

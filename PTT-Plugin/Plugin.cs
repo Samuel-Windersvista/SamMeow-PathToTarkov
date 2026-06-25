@@ -146,27 +146,20 @@ public class Plugin : BaseUnityPlugin
 
         if (CurrentLocationDataService != null)
         {
-            bool initOk = CurrentLocationDataService.Init();
-            if (initOk)
+            CurrentLocationDataService.Init();
+            Helpers.Logger.Info("Initialized CurrentLocationDataService");
+            
+            // Clear any cached exfil prompts before applying filtering
+            if (IEApiWrapper.ExfilPromptService != null)
             {
-                Helpers.Logger.Info("Initialized CurrentLocationDataService");
-                
-                // Clear any cached exfil prompts before applying filtering
-                if (IEApiWrapper.ExfilPromptService != null)
-                {
-                    IEApiWrapper.ExfilPromptService.ClearExfilPromptsCache();
-                }
-                
-                // Disable non-configured exfils now that we know which ones are enabled
-                Patches.ExfiltrationPointAwakePatch.DisableInvalidExfils();
-                
-                // Apply exfil filtering now that location data is loaded
-                Patches.InitAllExfiltrationPointsPatch.ApplyExfilFiltering();
+                IEApiWrapper.ExfilPromptService.ClearExfilPromptsCache();
             }
-            else
-            {
-                Helpers.Logger.Warning("CurrentLocationDataService init failed — vanilla exfils preserved");
-            }
+            
+            // Disable non-configured exfils now that we know which ones are enabled
+            Patches.ExfiltrationPointAwakePatch.DisableInvalidExfils();
+            
+            // Apply exfil filtering now that location data is loaded
+            Patches.InitAllExfiltrationPointsPatch.ApplyExfilFiltering();
         }
         else
         {

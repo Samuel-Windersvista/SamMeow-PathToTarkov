@@ -117,30 +117,32 @@ export class EventWatcher {
           const locationBase: ILocationBase = result.locationLoot;
 
           // Debug logging for headless client investigation
-          this.ptt.debug(
-            `startLocalRaid called with sessionId: ${sessionId}, location: ${data.location}, playerSide: ${data.playerSide}`,
+          this.ptt.logger.info(
+            `[PTT Debug] startLocalRaid called with sessionId: ${sessionId}, location: ${data.location}, playerSide: ${data.playerSide}`,
           );
-          this.ptt.debug(
-            `Initial spawn points count: ${locationBase.SpawnPointParams?.length || 0}`,
+          this.ptt.logger.info(
+            `[PTT Debug] Initial spawn points count: ${locationBase.SpawnPointParams?.length || 0}`,
           );
 
           this.ptt.pathToTarkovController.syncLocationBase(locationBase, sessionId);
 
           // Log spawn points after sync
-          this.ptt.debug(
-            `After sync spawn points count: ${locationBase.SpawnPointParams?.length || 0}`,
+          this.ptt.logger.info(
+            `[PTT Debug] After sync spawn points count: ${locationBase.SpawnPointParams?.length || 0}`,
           );
           const playerSpawns =
             locationBase.SpawnPointParams?.filter(sp => sp.Categories?.includes('Player')) || [];
-          this.ptt.debug(
-            `Player spawn points: ${playerSpawns.map(sp => `${sp.Id} (Infiltration: ${sp.Infiltration})`).join(', ')}`,
+          this.ptt.logger.info(
+            `[PTT Debug] Player spawn points: ${playerSpawns.map(sp => `${sp.Id} (Infiltration: ${sp.Infiltration})`).join(', ')}`,
           );
 
           // Additional debug for headless client detection
           const profile = this.saveServer.getProfile(sessionId);
           const profileName = profile?.info?.username || 'unknown';
           const isHeadless = profileName.toLowerCase().includes('headless');
-          this.ptt.debug(`Profile name: ${profileName}, Is headless: ${isHeadless}`);
+          this.ptt.logger.info(
+            `[PTT Debug] Profile name: ${profileName}, Is headless: ${isHeadless}`,
+          );
 
           this.initRaidCache(sessionId);
           const raidCache = this.getRaidCache(sessionId);
@@ -286,22 +288,16 @@ export class EventWatcher {
       throw new Error('raidCache.transitTargetMapName is null');
     }
 
-    const exitStatus = this.raidCaches[sessionId].exitStatus;
-
     const endOfRaidPayload: EndOfRaidPayload = {
       sessionId,
       locationName: currentLocationName,
       isPlayerScav,
       exitName,
       newOffraidPosition: targetOffraidPosition,
-      isTransit: exitStatus === 'Transit' || !targetOffraidPosition,
+      isTransit: !targetOffraidPosition,
     };
 
     if (exitName && !targetOffraidPosition && !transitTargetMapName && !transitTargetSpawnPointId) {
-      if (exitStatus === 'Transit') {
-        // Vanilla transit: SPT core already handled it, no PTT processing needed
-        return endOfRaidPayload;
-      }
       return this.handleRegularExtracts(endOfRaidPayload);
     }
 

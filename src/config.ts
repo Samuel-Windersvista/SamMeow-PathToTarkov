@@ -172,7 +172,7 @@ type Exfiltrations = ByMap<{
   [extractName: ExtractName]: OffraidPositionName[];
 }>;
 
-export type Infiltrations = {
+type Infiltrations = {
   [offraidPosition: OffraidPositionName]: ByMap<SpawnPointName[]>;
 };
 
@@ -223,7 +223,6 @@ type RawConfig = {
   enable_legacy_ptt_api?: boolean;
   bypass_exfils_override?: boolean;
   enable_all_vanilla_transits?: boolean;
-  vanilla_transit_destination?: Record<string, string>;
 };
 
 export type Config = Omit<
@@ -325,12 +324,6 @@ const toStashConfig = (rawStashConfig: RawStashConfig): StashConfig => {
 export const EMPTY_STASH = toStashConfig({
   id: 'PathToTarkov_Empty_Stash',
   size: 0,
-  access_via: [], // not used but this simplify typing
-});
-
-export const ROAMING_EMERGENCY_STASH = toStashConfig({
-  id: 'PathToTarkov_Roaming_Emergency_Stash',
-  size: 20,
   access_via: [], // not used but this simplify typing
 });
 
