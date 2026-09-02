@@ -1,0 +1,8 @@
+packages:
+  - "."
+
+allowBuilds:
+  '@biomejs/biome': true
+  '@pnpm/exe': true
+  '@swc/core': true
+  esbuild: true
